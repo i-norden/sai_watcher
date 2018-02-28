@@ -25,7 +25,7 @@ func (cupsRepository CupsRepository) CreateCup(logId int64, cup fetchers.Cup, bl
 func (cupsRepository CupsRepository) GetCupsByIndex(cupIndex int) ([]DBCup, error) {
 	cups := []DBCup{}
 
-	err := cupsRepository.Select(&cups, "SELECT log_id,  cup_index, lad, ink::VARCHAR, art::VARCHAR, irk::VARCHAR, block_number, is_closed FROM cups WHERE cup_index = $1", cupIndex)
+	err := cupsRepository.Select(&cups, "SELECT DISTINCT ON(cup_index, block_number) log_id,  cup_index, lad, ink::VARCHAR, art::VARCHAR, irk::VARCHAR, block_number, is_closed FROM cups WHERE cup_index = $1", cupIndex)
 	if err != nil {
 		return cups, err
 	}

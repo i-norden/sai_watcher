@@ -3,7 +3,6 @@ package handlers
 import (
     "log"
 
-    "github.com/ethereum/go-ethereum/common"
     "github.com/vulcanize/vulcanizedb/libraries/shared"
     "github.com/vulcanize/vulcanizedb/pkg/core"
     "github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
@@ -11,6 +10,7 @@ import (
     "github.com/vulcanize/vulcanizedb/pkg/filters"
     "github.com/8thlight/sai_watcher/cup/fetchers"
     cuprepo "github.com/8thlight/sai_watcher/cup/repositories"
+    "github.com/ethereum/go-ethereum/common"
 )
 
 type CreatedHandler struct {

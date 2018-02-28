@@ -13,7 +13,7 @@ import (
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres/repositories"
 	"github.com/vulcanize/vulcanizedb/pkg/filters"
-	"github.com/vulcanize/vulcanizedb/pkg/graphql_server"
+	"github.com/8thlight/sai_watcher/graphql_server"
 )
 
 func formatJSON(data []byte) []byte {

@@ -7,11 +7,10 @@ import (
 
 	"path/filepath"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/geth"
-	"fmt"
 	"github.com/8thlight/sai_watcher/utils"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var (
@@ -45,6 +44,5 @@ func (gethCupDateFetcher *Fetcher) FetchCupData(methodArg interface{}, blockNumb
 	method := "cups"
 	result := &Cup{}
 	err = gethCupDateFetcher.blockchain.FetchContractData(abi, address, method, methodArg, result, blockNumber)
-	fmt.Println("Fetcher ERROR: ", err)
 	return result, err
 }
