@@ -2,3 +2,6 @@
 
 ## Description
 Library code for watching the Sai contract with VulcanizeDB
+
+## Setup
+`go get`
