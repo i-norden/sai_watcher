@@ -1,16 +1,17 @@
-package fetchers
+package fetchers_test
 
 import (
 	"math/big"
 
 	"path/filepath"
 
+	"github.com/8thlight/sai_watcher/cup/fetchers"
+	"github.com/8thlight/sai_watcher/utils"
+	"github.com/ethereum/go-ethereum/common"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/vulcanize/vulcanizedb/pkg/geth"
-	"github.com/8thlight/sai_watcher/utils"
 	"github.com/vulcanize/vulcanizedb/pkg/config"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/vulcanize/vulcanizedb/pkg/geth"
 )
 
 type fakeCupDataFetcher struct {
@@ -20,6 +21,10 @@ type fakeCupDataFetcher struct {
 	methodArgs   []interface{}
 	results      []interface{}
 	blocknumbers []int64
+}
+
+func (cdf *fakeCupDataFetcher) GetContractOutput(address string, input []byte, blockNumber int64) ([]byte, error) {
+	panic("implement me")
 }
 
 func (cdf *fakeCupDataFetcher) FetchContractData(abiJSON string, address string, method string, methodArg interface{}, result interface{}, blockNumber int64) error {
@@ -36,7 +41,7 @@ var _ = Describe("Cup Data Fetcher", func() {
 	Describe("Getting cup attributes", func() {
 		It("correctly decodes byte array to JSON", func() {
 			blockchain := &fakeCupDataFetcher{}
-			client := NewFetcher(blockchain)
+			client := fetchers.NewFetcher(blockchain)
 			args := common.HexToHash("0x00000000000000000000000000000000000000000000000000000000000002c6")
 			blockNumber := int64(5136253)
 
@@ -44,10 +49,9 @@ var _ = Describe("Cup Data Fetcher", func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(len(blockchain.abis)).To(Equal(1))
-			expectedAbiPath := filepath.Join(utils.ProjectRoot(), "cup", "saitub.json")
-			expectedAbi, err := geth.ReadAbiFile(expectedAbiPath)
+			abiJSON, err := geth.ReadAbiFile(filepath.Join(utils.ProjectRoot(), "cup", "saitub.json"))
 			Expect(err).NotTo(HaveOccurred())
-			Expect(blockchain.abis[0]).To(Equal(expectedAbi))
+			Expect(blockchain.abis[0]).To(Equal(abiJSON))
 			Expect(len(blockchain.addresses)).To(Equal(1))
 			Expect(blockchain.addresses[0]).To(Equal("0x448a5065aebb8e423f0896e6c5d525c040f59af3"))
 			Expect(len(blockchain.methods)).To(Equal(1))
@@ -55,18 +59,24 @@ var _ = Describe("Cup Data Fetcher", func() {
 			Expect(len(blockchain.methodArgs)).To(Equal(1))
 			Expect(blockchain.methodArgs[0]).To(Equal(args))
 			Expect(len(blockchain.results)).To(Equal(1))
-			Expect(blockchain.results[0]).To(Equal(&Cup{}))
+			Expect(blockchain.results[0]).To(Equal(&fetchers.Cup{}))
 			Expect(len(blockchain.blocknumbers)).To(Equal(1))
 			Expect(blockchain.blocknumbers[0]).To(Equal(blockNumber))
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 	})
+	It("connects to infura using config", func() {
+		_, err := config.NewConfig("infura")
+
+		Expect(err).NotTo(HaveOccurred())
+	})
 
 	It("makes call to passed blockchain", func() {
-		config, err := config.NewConfig("infura")
+		cfg, err := config.NewConfig("infura")
 		Expect(err).NotTo(HaveOccurred())
-		blockchain := geth.NewBlockchain(config.Client.IPCPath)
-		client := NewFetcher(blockchain)
+		blockchain := geth.NewBlockchain(cfg.Client.IPCPath)
+		client := fetchers.NewFetcher(blockchain)
 		args := common.HexToHash("0x00000000000000000000000000000000000000000000000000000000000002c6")
 
 		contractData, err := client.FetchCupData(args, 5136253)
@@ -83,4 +93,31 @@ var _ = Describe("Cup Data Fetcher", func() {
 		Expect(irk).To(Equal(contractData.Irk))
 		Expect("0x9b4e28020B94B28f9f09edE87F588e89c283cFFD").To(Equal(contractData.Lad.Hex()))
 	})
+
+	It("makes call to passed blockchain", func() {
+		cfg, err := config.NewConfig("infura")
+		Expect(err).NotTo(HaveOccurred())
+		blockchain := geth.NewBlockchain(cfg.Client.IPCPath)
+		args := common.HexToHash("0x00000000000000000000000000000000000000000000000000000000000002c6")
+		address := "0x448a5065aebb8e423f0896e6c5d525c040f59af3"
+		method := "cups"
+		abiPath := "/Users/mattkrump/go/src/github.com/8thlight/sai_watcher/cup/saitub.json"
+
+		contractData := &fetchers.Cup{}
+		abiJSON, err := geth.ReadAbiFile(abiPath)
+		err = blockchain.FetchContractData(abiJSON, address, method, args, contractData, int64(5136253))
+
+		Expect(err).NotTo(HaveOccurred())
+		ink := new(big.Int)
+		ink.SetString("3825000000000000000", 10)
+		Expect(ink).To(Equal(contractData.Ink))
+		art := new(big.Int)
+		art.SetString("720000000000000000000", 10)
+		Expect(art).To(Equal(contractData.Art))
+		irk := new(big.Int)
+		irk.SetString("719369287647780430799", 10)
+		Expect(irk).To(Equal(contractData.Irk))
+		Expect("0x9b4e28020B94B28f9f09edE87F588e89c283cFFD").To(Equal(contractData.Lad.Hex()))
+	})
+
 })

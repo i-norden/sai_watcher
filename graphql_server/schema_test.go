@@ -6,14 +6,15 @@ import (
 
 	"encoding/json"
 
+	"github.com/8thlight/sai_watcher/graphql_server"
 	"github.com/neelance/graphql-go"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/vulcanize/vulcanizedb/pkg/config"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres/repositories"
 	"github.com/vulcanize/vulcanizedb/pkg/filters"
-	"github.com/8thlight/sai_watcher/graphql_server"
 )
 
 func formatJSON(data []byte) []byte {
@@ -33,7 +34,16 @@ var _ = Describe("GraphQL", func() {
 
 	BeforeEach(func() {
 		node := core.Node{GenesisBlock: "GENESIS", NetworkId: 1, Id: "x123", ClientName: "geth"}
-		db := postgres.NewTestDB(node)
+		db, err := postgres.NewDB(config.Database{
+			Hostname: "localhost",
+			Name:     "vulcanize_private",
+			Port:     5432,
+		}, node)
+		Expect(err).NotTo(HaveOccurred())
+		db.Query(`DELETE FROM maker.cups`)
+		db.Query(`DELETE FROM maker.peps`)
+		db.Query(`DELETE FROM logs`)
+		db.Query(`DELETE FROM log_filters`)
 		blockRepository := &repositories.BlockRepository{DB: db}
 		logRepository := &repositories.LogRepository{DB: db}
 		filterRepository := &repositories.FilterRepository{DB: db}
@@ -45,7 +55,7 @@ var _ = Describe("GraphQL", func() {
 			FilterRepository:       filterRepository,
 		}
 
-		err := graphQLRepositories.CreateFilter(filters.LogFilter{
+		err = graphQLRepositories.CreateFilter(filters.LogFilter{
 			Name:      "TestFilter1",
 			FromBlock: 1,
 			ToBlock:   10,

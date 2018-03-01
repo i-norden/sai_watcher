@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/vulcanize/vulcanizedb/pkg/config"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
 )
@@ -56,13 +57,25 @@ func (MockWatchedEventsRepository) GetWatchedEvents(name string) ([]*core.Watche
 
 type FakePepFetcher struct{}
 
+func (FakePepFetcher) GetContractOutput(address string, input []byte, blockNumber int64) ([]byte, error) {
+	panic("implement me")
+}
+
 func (FakePepFetcher) FetchContractData(abiJSON string, address string, method string, methodArg interface{}, result interface{}, blockNumber int64) error {
 	panic("implement me")
 }
 
 var _ = Describe("pep updater", func() {
 	It("Updates a pep", func() {
-		db := postgres.NewTestDB(core.Node{})
+		db, err := postgres.NewDB(config.Database{
+			Hostname: "localhost",
+			Name:     "vulcanize_private",
+			Port:     5432,
+		}, core.Node{})
+		Expect(err).NotTo(HaveOccurred())
+		db.Query(`DELETE FROM cups`)
+		db.Query(`DELETE FROM logs`)
+		db.Query(`DELETE FROM log_filters`)
 
 		pepUpdater := NewPepHandler(db, &FakePepFetcher{})
 		pepsRepository := &MockPepsRepository{}

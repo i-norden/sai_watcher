@@ -11,9 +11,9 @@ type PepsRepository struct {
 
 func (pepsRepository PepsRepository) CreatePep(value string, blockNumber int64, logId int64) error {
 	_, err := pepsRepository.Exec(
-		`INSERT INTO peps (log_id, block_number, value)
+		`INSERT INTO maker.peps (log_id, block_number, value)
                 SELECT $1, $2, $3 
-                WHERE NOT EXISTS ( SELECT log_id FROM peps WHERE log_id = $1)`, logId, blockNumber, value)
+                WHERE NOT EXISTS ( SELECT log_id FROM maker.peps WHERE log_id = $1)`, logId, blockNumber, value)
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (pepsRepository PepsRepository) CheckNewPep() ([]*core.WatchedEvent, error)
               topic3, 
               data 
             FROM watched_event_logs
-              LEFT JOIN peps
+              LEFT JOIN maker.peps peps
                 ON peps.log_id = watched_event_logs.id
             WHERE peps.log_id IS NULL AND name = 'Peps'`)
 	if err != nil {

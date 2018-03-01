@@ -3,6 +3,7 @@ package pep
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/vulcanize/vulcanizedb/pkg/config"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres/repositories"
@@ -14,9 +15,19 @@ var _ = Describe("Peps Repository", func() {
 	var pepsRepository PepsRepository
 	var logsRepository repositories.LogRepository
 	var filterRepository repositories.FilterRepository
+	var err error
 
 	BeforeEach(func() {
-		db = postgres.NewTestDB(core.Node{})
+		db, err = postgres.NewDB(config.Database{
+			Hostname: "localhost",
+			Name:     "vulcanize_private",
+			Port:     5432,
+		}, core.Node{})
+		Expect(err).NotTo(HaveOccurred())
+		db.Query(`DELETE FROM maker.cups`)
+		db.Query(`DELETE FROM maker.peps`)
+		db.Query(`DELETE FROM logs`)
+		db.Query(`DELETE FROM log_filters`)
 		pepsRepository = PepsRepository{DB: db}
 		logsRepository = repositories.LogRepository{DB: db}
 		filterRepository = repositories.FilterRepository{DB: db}
@@ -41,7 +52,7 @@ var _ = Describe("Peps Repository", func() {
 			var logId int64
 			var blockNumber int64
 			err = pepsRepository.DB.QueryRow(`SELECT 
-				id, log_id, block_number FROM peps`).
+				id, log_id, block_number FROM maker.peps`).
 				Scan(&id, &logId, &blockNumber)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(id).ToNot(BeNil())

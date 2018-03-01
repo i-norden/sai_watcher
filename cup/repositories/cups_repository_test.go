@@ -3,14 +3,15 @@ package repositories
 import (
 	"math/big"
 
+	"github.com/8thlight/sai_watcher/cup/fetchers"
 	"github.com/ethereum/go-ethereum/common"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/vulcanize/vulcanizedb/pkg/config"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres/repositories"
 	"github.com/vulcanize/vulcanizedb/pkg/filters"
-	"github.com/8thlight/sai_watcher/cup/fetchers"
 )
 
 var _ = Describe("Cups Repository", func() {
@@ -22,7 +23,17 @@ var _ = Describe("Cups Repository", func() {
 
 	BeforeEach(func() {
 		node = core.Node{}
-		db = postgres.NewTestDB(node)
+		var err error
+		db, err = postgres.NewDB(config.Database{
+			Hostname: "localhost",
+			Name:     "vulcanize_private",
+			Port:     5432,
+		}, core.Node{})
+		Expect(err).NotTo(HaveOccurred())
+		db.Query(`DELETE FROM maker.cups`)
+		db.Query(`DELETE FROM maker.peps`)
+		db.Query(`DELETE FROM logs`)
+		db.Query(`DELETE FROM log_filters`)
 		logRepository = repositories.LogRepository{DB: db}
 		cupsRepository = CupsRepository{DB: db}
 		filterRepository = repositories.FilterRepository{DB: db}
@@ -62,7 +73,7 @@ var _ = Describe("Cups Repository", func() {
 			var DBblockNumber int64
 			var DBisClosed bool
 			err = cupsRepository.DB.QueryRowx(
-				`SELECT log_id, cup_index, lad, ink, art, irk, block_number, is_closed FROM cups`).
+				`SELECT log_id, cup_index, lad, ink, art, irk, block_number, is_closed FROM maker.cups`).
 				Scan(&DBlogId, &DBcupIndex, &DBlad, &DBink, &DBart, &DBirk, &DBblockNumber, &DBisClosed)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(DBlogId).To(Equal(logId))
@@ -103,7 +114,7 @@ var _ = Describe("Cups Repository", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			cups := []DBCup{}
-			err = cupsRepository.DB.Select(&cups, `SELECT log_id, cup_index, lad, ink, art, irk, block_number, is_closed FROM cups`)
+			err = cupsRepository.DB.Select(&cups, `SELECT log_id, cup_index, lad, ink, art, irk, block_number, is_closed FROM maker.cups`)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(len(cups)).To(Equal(1))
 		})

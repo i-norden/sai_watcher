@@ -7,10 +7,10 @@ import (
 
 	"path/filepath"
 
-	"github.com/vulcanize/vulcanizedb/pkg/core"
-	"github.com/vulcanize/vulcanizedb/pkg/geth"
 	"github.com/8thlight/sai_watcher/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/vulcanize/vulcanizedb/pkg/core"
+	"github.com/vulcanize/vulcanizedb/pkg/geth"
 )
 
 var (
@@ -36,13 +36,13 @@ type Cup struct {
 
 func (gethCupDateFetcher *Fetcher) FetchCupData(methodArg interface{}, blockNumber int64) (*Cup, error) {
 	abiPath := filepath.Join(utils.ProjectRoot(), "cup", "saitub.json")
-	abi, err := geth.ReadAbiFile(abiPath)
+	abiJSON, err := geth.ReadAbiFile(abiPath)
 	if err != nil {
 		return &Cup{}, err
 	}
 	address := "0x448a5065aebb8e423f0896e6c5d525c040f59af3"
 	method := "cups"
 	result := &Cup{}
-	err = gethCupDateFetcher.blockchain.FetchContractData(abi, address, method, methodArg, result, blockNumber)
+	err = gethCupDateFetcher.blockchain.FetchContractData(abiJSON, address, method, methodArg, result, blockNumber)
 	return result, err
 }

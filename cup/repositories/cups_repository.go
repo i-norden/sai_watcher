@@ -1,9 +1,9 @@
 package repositories
 
 import (
+	"github.com/8thlight/sai_watcher/cup/fetchers"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
-	"github.com/8thlight/sai_watcher/cup/fetchers"
 )
 
 type CupsRepository struct {
@@ -12,9 +12,9 @@ type CupsRepository struct {
 
 func (cupsRepository CupsRepository) CreateCup(logId int64, cup fetchers.Cup, blockNumber int64, isClosed bool, cupIndex int64) error {
 	_, err := cupsRepository.Exec(
-		`INSERT INTO cups (log_id, cup_index, lad, ink, art, irk, block_number, is_closed) 
+		`INSERT INTO maker.cups (log_id, cup_index, lad, ink, art, irk, block_number, is_closed)
                 SELECT $1, $2, $3, $4::NUMERIC, $5::NUMERIC, $6::NUMERIC, $7, $8
-                WHERE NOT EXISTS (SELECT log_id FROM cups WHERE log_id = $1)`,
+                WHERE NOT EXISTS (SELECT log_id FROM maker.cups WHERE log_id = $1)`,
 		logId, cupIndex, cup.Lad.Hex(), cup.Ink.String(), cup.Art.String(), cup.Irk.String(), blockNumber, isClosed)
 	if err != nil {
 		return err
@@ -25,7 +25,7 @@ func (cupsRepository CupsRepository) CreateCup(logId int64, cup fetchers.Cup, bl
 func (cupsRepository CupsRepository) GetCupsByIndex(cupIndex int) ([]DBCup, error) {
 	cups := []DBCup{}
 
-	err := cupsRepository.Select(&cups, "SELECT DISTINCT ON(cup_index, block_number) log_id,  cup_index, lad, ink::VARCHAR, art::VARCHAR, irk::VARCHAR, block_number, is_closed FROM cups WHERE cup_index = $1", cupIndex)
+	err := cupsRepository.Select(&cups, "SELECT DISTINCT ON(cup_index, block_number) log_id,  cup_index, lad, ink::VARCHAR, art::VARCHAR, irk::VARCHAR, block_number, is_closed FROM maker.cups WHERE cup_index = $1", cupIndex)
 	if err != nil {
 		return cups, err
 	}
@@ -47,7 +47,7 @@ func (cupsRepository CupsRepository) GetCupEvents() ([]*core.WatchedEvent, error
               topic3, 
               data 
             FROM watched_event_logs
-              LEFT JOIN cups
+              LEFT JOIN maker.cups cups
                 ON cups.log_id = watched_event_logs.id
             WHERE cups.log_id IS NULL AND name = 'Cups'`)
 	if err != nil {

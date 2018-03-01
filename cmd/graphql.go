@@ -15,17 +15,17 @@
 package cmd
 
 import (
+	"log"
+	"net/http"
 
-	"github.com/spf13/cobra"
+	cupsRepo "github.com/8thlight/sai_watcher/cup/repositories"
+	"github.com/8thlight/sai_watcher/graphql_server"
 	"github.com/neelance/graphql-go"
 	"github.com/neelance/graphql-go/relay"
-	"github.com/vulcanize/vulcanizedb/pkg/geth"
-	"github.com/vulcanize/vulcanizedb/utils"
-	"net/http"
-	"log"
-	"github.com/8thlight/sai_watcher/graphql_server"
+	"github.com/spf13/cobra"
+	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres/repositories"
-	cupsRepo "github.com/8thlight/sai_watcher/cup/repositories"
+	"github.com/vulcanize/vulcanizedb/pkg/geth"
 )
 
 // graphqlCmd represents the graphql command
@@ -39,8 +39,8 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-	    schema := parseSchema()
-	    serve(schema)
+		schema := parseSchema()
+		serve(schema)
 	},
 }
 
@@ -51,12 +51,15 @@ func init() {
 func parseSchema() *graphql.Schema {
 
 	blockchain := geth.NewBlockchain("/Users/mattkrump/Library/Ethereum/geth.ipc")
-	db := utils.LoadPostgres(cfg, blockchain.Node())
-	blockRepository := &repositories.BlockRepository{DB: &db}
-	logRepository := &repositories.LogRepository{DB: &db}
-	filterRepository := &repositories.FilterRepository{DB: &db}
-	watchedEventRepository := &repositories.WatchedEventRepository{DB: &db}
-	cupsRepository := &cupsRepo.CupsRepository{DB: &db}
+	db, err := postgres.NewDB(databaseConfig, blockchain.Node())
+	if err != nil {
+		log.Fatal("Can't connect to db")
+	}
+	blockRepository := &repositories.BlockRepository{DB: db}
+	logRepository := &repositories.LogRepository{DB: db}
+	filterRepository := &repositories.FilterRepository{DB: db}
+	watchedEventRepository := &repositories.WatchedEventRepository{DB: db}
+	cupsRepository := &cupsRepo.CupsRepository{DB: db}
 	graphQLRepositories := graphql_server.GraphQLRepositories{
 		WatchedEventRepository: watchedEventRepository,
 		BlockRepository:        blockRepository,
