@@ -35,8 +35,7 @@
 
 [[constraint]]
   name = "github.com/vulcanize/vulcanizedb"
-  source = "https://github.com/8thlight/vulcanizedb"
-  branch = "custom_handlers"
+  source = "https://github.com/vulcanize/vulcanizedb"
 
 [[constraint]]
   branch = "master"

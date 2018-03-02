@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
 	"github.com/vulcanize/vulcanizedb/pkg/geth"
-	"github.com/vulcanize/vulcanizedb/pkg/watchers"
+	"github.com/vulcanize/vulcanizedb/libraries/shared"
 )
 
 // getEventsCmd represents the getEvents command
@@ -36,7 +36,7 @@ func getEvents() {
 	if err != nil {
 		log.Fatal("DB")
 	}
-	watcher := watchers.Watcher{
+	watcher := shared.Watcher{
 		DB:         *db,
 		Blockchain: blockchain,
 	}

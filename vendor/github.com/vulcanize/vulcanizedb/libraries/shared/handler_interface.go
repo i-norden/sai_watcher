@@ -13,8 +13,8 @@ type Handler interface {
 type HandlerInitializer func(db *postgres.DB, blockchain core.ContractDataFetcher) Handler
 
 func HexToInt64(byteString string) int64 {
-	cupsIndex := common.HexToHash(byteString)
-	return cupsIndex.Big().Int64()
+	intHash := common.HexToHash(byteString)
+	return intHash.Big().Int64()
 }
 
 func HexToString(byteString string) string {

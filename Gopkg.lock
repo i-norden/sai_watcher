@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  name = "github.com/BurntSushi/toml"
-  packages = ["."]
-  revision = "b26d9c308763d68093482582cea63d69be07a0f0"
-  version = "v0.3.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/aristanetworks/goarista"
   packages = ["monotime"]
@@ -313,12 +307,10 @@
     "pkg/filters",
     "pkg/geth",
     "pkg/geth/node",
-    "pkg/history",
-    "pkg/watchers",
-    "utils"
+    "pkg/history"
   ]
-  revision = "5c1fec55e50c4f79419a0e48ca2df6009ccba04f"
-  source = "https://github.com/8thlight/vulcanizedb"
+  revision = "0854619e66151c83301f22359ac5e56bb10cdf0f"
+  source = "https://github.com/vulcanize/vulcanizedb"
 
 [[projects]]
   branch = "master"
@@ -392,6 +384,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "71511fce5da05e2ad4f6b98e2c08865f40c959eecd33c1b3e98ae5d77383131f"
+  inputs-digest = "fb2f6f8046cada3fb78dce9bade7fad56b527700743efe764545f1f9d6cae00c"
   solver-name = "gps-cdcl"
   solver-version = 1

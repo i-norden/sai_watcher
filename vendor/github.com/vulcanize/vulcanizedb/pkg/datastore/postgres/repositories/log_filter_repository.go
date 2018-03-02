@@ -58,9 +58,7 @@ func (t *DBTopics) Scan(src interface{}) error {
 	if !ok {
 		return error(errors.New("scan source was not []byte"))
 	}
-	json.Unmarshal(asBytes, &t)
-
-	return nil
+	return json.Unmarshal(asBytes, &t)
 }
 
 type DBLogFilter struct {

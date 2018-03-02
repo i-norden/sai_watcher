@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" //postgres driver
 	"github.com/vulcanize/vulcanizedb/pkg/config"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 )
@@ -12,7 +12,7 @@ import (
 type DB struct {
 	*sqlx.DB
 	Node   core.Node
-	NodeId int64
+	NodeID int64
 }
 
 var (
@@ -48,10 +48,10 @@ func (db *DB) CreateNode(node *core.Node) error {
                         node_id = $3,
                         client_name = $4
                 RETURNING id`,
-		node.GenesisBlock, node.NetworkId, node.Id, node.ClientName).Scan(&nodeId)
+		node.GenesisBlock, node.NetworkID, node.ID, node.ClientName).Scan(&nodeId)
 	if err != nil {
 		return ErrUnableToSetNode
 	}
-	db.NodeId = nodeId
+	db.NodeID = nodeId
 	return nil
 }

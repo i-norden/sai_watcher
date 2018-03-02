@@ -1,18 +1,17 @@
-package watchers
+package shared
 
 import (
-	"github.com/vulcanize/vulcanizedb/libraries/shared"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
 )
 
 type Watcher struct {
-	Handlers   []shared.Handler
+	Handlers   []Handler
 	DB         postgres.DB
 	Blockchain core.ContractDataFetcher
 }
 
-func (watcher *Watcher) AddHandlers(us []shared.HandlerInitializer) {
+func (watcher *Watcher) AddHandlers(us []HandlerInitializer) {
 	for _, handlerInitializer := range us {
 		handler := handlerInitializer(&watcher.DB, watcher.Blockchain)
 		watcher.Handlers = append(watcher.Handlers, handler)

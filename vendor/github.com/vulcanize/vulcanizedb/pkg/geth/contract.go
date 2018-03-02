@@ -9,7 +9,6 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 )
@@ -28,7 +27,7 @@ func (blockchain *Blockchain) GetAttribute(contract core.Contract, attributeName
 	if err != nil {
 		return nil, ErrInvalidStateAttribute
 	}
-	output, err := blockchain.CallContract(contract.Hash, input, blockNumber)
+	output, err := blockchain.callContract(contract.Hash, input, blockNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -39,39 +38,23 @@ func (blockchain *Blockchain) GetAttribute(contract core.Contract, attributeName
 	return result, nil
 }
 
-func parse(abiJSON string) (abi.ABI, error) {
-	return ParseAbi(abiJSON)
-}
-
-func encode(parsed abi.ABI, method string, methodArg interface{}) ([]byte, error) {
-	return parsed.Pack(method, methodArg)
-}
-
-func decode(parsed abi.ABI, result interface{}, method string, output []byte) error {
+func (blockchain *Blockchain) FetchContractData(abiJSON string, address string, method string, methodArg interface{}, result interface{}, blockNumber int64) error {
+	parsed, err := ParseAbi(abiJSON)
+	if err != nil {
+		return err
+	}
+	input, err := parsed.Pack(method, methodArg)
+	if err != nil {
+		return err
+	}
+	output, err := blockchain.callContract(address, input, big.NewInt(blockNumber))
+	if err != nil {
+		return err
+	}
 	return parsed.Unpack(result, method, output)
 }
 
-func (blockchain *Blockchain) GetContractOutput(address string, input []byte, blockNumber int64) ([]byte, error) {
-	return blockchain.CallContract(address, input, big.NewInt(blockNumber))
-}
-
-func (blockchain *Blockchain) FetchContractData(abiJSON string, address string, method string, methodArg interface{}, result interface{}, blockNumber int64) error {
-	parsed, err := parse(abiJSON)
-	if err != nil {
-		return err
-	}
-	input, err := encode(parsed, method, methodArg)
-	if err != nil {
-		return err
-	}
-	output, err := blockchain.GetContractOutput(address, input, blockNumber)
-	if err != nil {
-		return err
-	}
-	return decode(parsed, result, method, output)
-}
-
-func (blockchain *Blockchain) CallContract(contractHash string, input []byte, blockNumber *big.Int) ([]byte, error) {
+func (blockchain *Blockchain) callContract(contractHash string, input []byte, blockNumber *big.Int) ([]byte, error) {
 	to := common.HexToAddress(contractHash)
 	msg := ethereum.CallMsg{To: &to, Data: input}
 	return blockchain.client.CallContract(context.Background(), msg, blockNumber)

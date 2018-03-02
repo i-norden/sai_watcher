@@ -1,7 +1,6 @@
 package datastore
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/vulcanize/vulcanizedb/pkg/core"
@@ -9,7 +8,7 @@ import (
 )
 
 var ErrBlockDoesNotExist = func(blockNumber int64) error {
-	return errors.New(fmt.Sprintf("Block number %d does not exist", blockNumber))
+	return fmt.Errorf("Block number %d does not exist", blockNumber)
 }
 
 type BlockRepository interface {
@@ -20,7 +19,7 @@ type BlockRepository interface {
 }
 
 var ErrContractDoesNotExist = func(contractHash string) error {
-	return errors.New(fmt.Sprintf("Contract %v does not exist", contractHash))
+	return fmt.Errorf("Contract %v does not exist", contractHash)
 }
 
 type ContractRepository interface {
@@ -30,7 +29,7 @@ type ContractRepository interface {
 }
 
 var ErrFilterDoesNotExist = func(name string) error {
-	return errors.New(fmt.Sprintf("filter %s does not exist", name))
+	return fmt.Errorf("filter %s does not exist", name)
 }
 
 type FilterRepository interface {
@@ -44,7 +43,7 @@ type LogRepository interface {
 }
 
 var ErrReceiptDoesNotExist = func(txHash string) error {
-	return errors.New(fmt.Sprintf("Receipt for tx: %v does not exist", txHash))
+	return fmt.Errorf("Receipt for tx: %v does not exist", txHash)
 }
 
 type ReceiptRepository interface {

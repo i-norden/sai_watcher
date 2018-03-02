@@ -33,7 +33,7 @@ var _ = Describe("GraphQL", func() {
 	var graphQLRepositories graphql_server.GraphQLRepositories
 
 	BeforeEach(func() {
-		node := core.Node{GenesisBlock: "GENESIS", NetworkId: 1, Id: "x123", ClientName: "geth"}
+		node := core.Node{GenesisBlock: "GENESIS", NetworkID: 1, ID: "x123", ClientName: "geth"}
 		db, err := postgres.NewDB(config.Database{
 			Hostname: "localhost",
 			Name:     "vulcanize_private",
