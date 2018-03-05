@@ -19,10 +19,8 @@ var _ = Describe("Cups Repository", func() {
 	var cupsRepository CupsRepository
 	var filterRepository repositories.FilterRepository
 	var logRepository repositories.LogRepository
-	var node core.Node
 
 	BeforeEach(func() {
-		node = core.Node{}
 		var err error
 		db, err = postgres.NewDB(config.Database{
 			Hostname: "localhost",

@@ -1,11 +1,11 @@
 package utils
 
 import (
-    "path"
-    "runtime"
+	"path"
+	"runtime"
 )
 
 func ProjectRoot() string {
-    var _, filename, _, _ = runtime.Caller(0)
-    return path.Join(path.Dir(filename), "..")
+	var _, filename, _, _ = runtime.Caller(0)
+	return path.Join(path.Dir(filename), "..")
 }

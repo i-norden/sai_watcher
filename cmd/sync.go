@@ -31,7 +31,7 @@ Expects ethereum node to be running and requires a .toml config:
   port = 5432
 
   [client]
-  ipcPath = "/Users/mattkrump/Library/Ethereum/geth.ipc"
+  ipcPath = "/Users/user/Library/Ethereum/geth.ipc"
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		sync()
@@ -64,7 +64,6 @@ func sync() {
 	if blockchain.LastBlock().Int64() == 0 {
 		log.Fatal("geth initial: state sync not finished")
 	}
-	//TODO fix
 	db, err := postgres.NewDB(databaseConfig, blockchain.Node())
 	if err != nil {
 		log.Fatal(err)
