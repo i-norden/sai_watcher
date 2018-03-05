@@ -50,7 +50,7 @@ func init() {
 
 func parseSchema() *graphql.Schema {
 
-	blockchain := geth.NewBlockchain("/Users/mattkrump/Library/Ethereum/geth.ipc")
+	blockchain := geth.NewBlockchain(ipc)
 	db, err := postgres.NewDB(databaseConfig, blockchain.Node())
 	if err != nil {
 		log.Fatal("Can't connect to db")

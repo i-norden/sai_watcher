@@ -1,8 +1,8 @@
 package repositories
 
 import (
-	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/8thlight/sai_watcher/cup/fetchers"
+	"github.com/vulcanize/vulcanizedb/pkg/core"
 )
 
 type ICupsRepository interface {

@@ -1,0 +1,29 @@
+dist: trusty
+sudo: required
+
+language: go
+go:
+  - 1.9
+services:
+  - postgresql
+addons:
+  postgresql: "9.6"
+
+before_install:
+  # ginkgo golint dep migrate
+  - make installtools
+  - bash install-postgres-10.sh
+
+before_script:
+  - sudo -u postgres createdb vulcanize_private
+  - curl https://raw.githubusercontent.com/vulcanize/vulcanizedb/master/db/schema.sql > vulcanize_schema.sql
+  - sudo -u postgres psql vulcanize_private < vulcanize_schema.sql
+  - make migrate HOST_NAME=localhost NAME=vulcanize_private PORT=5432
+  - make fixlibcrypto
+  - sudo rm -r tmp-go-ethereum
+
+script:
+  - make test
+
+notifications:
+  email: false

@@ -6,9 +6,9 @@ import (
 	"github.com/8thlight/sai_watcher/cup"
 	"github.com/8thlight/sai_watcher/pep"
 	"github.com/spf13/cobra"
+	"github.com/vulcanize/vulcanizedb/libraries/shared"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
 	"github.com/vulcanize/vulcanizedb/pkg/geth"
-	"github.com/vulcanize/vulcanizedb/libraries/shared"
 )
 
 // getEventsCmd represents the getEvents command
@@ -31,7 +31,7 @@ func init() {
 }
 
 func getEvents() {
-	blockchain := geth.NewBlockchain("/Users/mattkrump/Library/Ethereum/geth.ipc")
+	blockchain := geth.NewBlockchain(ipc)
 	db, err := postgres.NewDB(databaseConfig, blockchain.Node())
 	if err != nil {
 		log.Fatal("DB")

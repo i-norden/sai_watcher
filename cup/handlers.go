@@ -1,8 +1,8 @@
 package cup
 
 import (
-	"github.com/vulcanize/vulcanizedb/libraries/shared"
 	"github.com/8thlight/sai_watcher/cup/handlers"
+	"github.com/vulcanize/vulcanizedb/libraries/shared"
 )
 
 func HandlerInitializers() []shared.HandlerInitializer {

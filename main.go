@@ -15,7 +15,7 @@
 package main
 
 import (
-    "github.com/8thlight/sai_watcher/cmd"
+	"github.com/8thlight/sai_watcher/cmd"
 )
 
 func main() {

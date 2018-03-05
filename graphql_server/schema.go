@@ -1,7 +1,7 @@
 package graphql_server
 
 import (
-    cupsrepo "github.com/8thlight/sai_watcher/cup/repositories"
+	cupsrepo "github.com/8thlight/sai_watcher/cup/repositories"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore"
 	"github.com/vulcanize/vulcanizedb/pkg/filters"
