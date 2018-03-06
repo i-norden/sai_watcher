@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/8thlight/sai_watcher/event_triggered/tub/cup_actions"
+	"github.com/8thlight/sai_watcher/event_triggered/tub/cup_actions/models"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/vulcanize/vulcanizedb/libraries/shared"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
@@ -50,7 +51,7 @@ func (cch CupCreatedTransformer) Execute() error {
 		log.Println("Error fetching events for filter: ", err)
 	}
 	for _, watchedEvent := range watchedEvents {
-		model := cup_actions.CupActionModel{
+		model := models.CupAction{
 			ID:              shared.HexToInt64(watchedEvent.Data),
 			TransactionHash: watchedEvent.TxHash,
 			Act:             "open",

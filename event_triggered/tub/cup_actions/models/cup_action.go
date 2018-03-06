@@ -1,6 +1,6 @@
-package cup_actions
+package models
 
-type CupActionModel struct {
+type CupAction struct {
 	ID              int64
 	TransactionHash string `db:"tx"`
 	Act             string

@@ -3,13 +3,14 @@ package cup_actions
 import (
 	"strings"
 
+	"github.com/8thlight/sai_watcher/event_triggered/tub/cup_actions/models"
 	"github.com/8thlight/sai_watcher/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/vulcanize/vulcanizedb/libraries/shared"
 )
 
-func ConvertToModel(entity CupActionEntity) CupActionModel {
-	return CupActionModel{
+func ConvertToModel(entity CupActionEntity) models.CupAction {
+	return models.CupAction{
 		ID:              shared.HexToInt64(entity.ID),
 		TransactionHash: entity.TransactionHash,
 		Act:             entity.Act,

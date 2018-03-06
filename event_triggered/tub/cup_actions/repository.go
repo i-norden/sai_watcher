@@ -1,12 +1,24 @@
 package cup_actions
 
-import "github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
+import (
+	"github.com/8thlight/sai_watcher/event_triggered/tub/cup_actions/models"
+	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
+)
 
 type CupActionsRepository struct {
 	DB *postgres.DB
 }
 
-func (car CupActionsRepository) CreateCupAction(cupAction CupActionModel, logID int64) error {
+func (car CupActionsRepository) GetAllCupData() ([]models.Cup, error) {
+	var results []models.Cup
+	err := car.DB.Select(&results, `SELECT act, art, block, deleted, id, ink, ire, lad, pip, per, ratio, tab, time FROM public.cup`)
+	if err != nil {
+		return results, err
+	}
+	return results, nil
+}
+
+func (car CupActionsRepository) CreateCupAction(cupAction models.CupAction, logID int64) error {
 	id := cupAction.ID
 	tx := cupAction.TransactionHash
 	act := cupAction.Act

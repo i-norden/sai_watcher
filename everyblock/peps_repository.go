@@ -11,6 +11,7 @@ type DataStore struct {
 type Repository interface {
 	Create(blockNumber int64, pep Peek, pip Peek, per Per) error
 	Get(blockNumber int64) (*Row, error)
+	GetAllRows() ([]Row, error)
 	MissingBlocks(startingBlockNumber int64, highestBlockNumber int64) ([]int64, error)
 }
 
@@ -64,4 +65,13 @@ func (ebds DataStore) Get(blockNumber int64) (*Row, error) {
 		return &Row{}, err
 	}
 	return result, nil
+}
+
+func (ebds DataStore) GetAllRows() ([]Row, error) {
+	var results []Row
+	err := ebds.DB.Select(&results, `SELECT id, block_number, block_id, block_time, pep, pip, per from maker.peps_everyblock`)
+	if err != nil {
+		return results, err
+	}
+	return results, nil
 }

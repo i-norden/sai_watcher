@@ -4,36 +4,13 @@ import (
 	"math/big"
 
 	"github.com/8thlight/sai_watcher/everyblock"
+	"github.com/8thlight/sai_watcher/test_helpers"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/vulcanize/vulcanizedb/pkg/config"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
 )
-
-type MockEveryBlockDataStore struct {
-	peps          []everyblock.Peek
-	pips          []everyblock.Peek
-	pers          []everyblock.Per
-	blockNumbers  []int64
-	missingBlocks []int64
-}
-
-func (mpr *MockEveryBlockDataStore) MissingBlocks(startingBlockNumber int64, highestBlockNumber int64) ([]int64, error) {
-	return mpr.missingBlocks, nil
-}
-
-func (mpr *MockEveryBlockDataStore) Get(blockNumber int64) (*everyblock.Row, error) {
-	panic("implement me")
-}
-
-func (mpr *MockEveryBlockDataStore) Create(blockNumber int64, pep everyblock.Peek, pip everyblock.Peek, per everyblock.Per) error {
-	mpr.blockNumbers = append(mpr.blockNumbers, blockNumber)
-	mpr.peps = append(mpr.peps, pep)
-	mpr.pips = append(mpr.pips, pip)
-	mpr.pers = append(mpr.pers, per)
-	return nil
-}
 
 type FakeBlockchain struct {
 	lastBlock *big.Int
@@ -82,7 +59,7 @@ var _ bool = Describe("pep updater", func() {
 		pepUpdater := everyblock.NewPepTransformer(db, &FakeBlockchain{})
 		blockchain := &fakeContractDataFetcher{lastBlock: filterFirstBlock}
 		int64s := []int64{filterFirstBlock.Int64()}
-		pepsRepository := &MockEveryBlockDataStore{missingBlocks: int64s}
+		pepsRepository := &test_helpers.MockEveryBlockDataStore{MissingBlocksData: int64s}
 		pepUpdater = &everyblock.Transformer{
 			Repository: pepsRepository,
 			Blockchain: blockchain,
@@ -90,8 +67,8 @@ var _ bool = Describe("pep updater", func() {
 
 		pepUpdater.Execute()
 
-		Expect(len(pepsRepository.blockNumbers)).To(Equal(1))
-		Expect(pepsRepository.blockNumbers[0]).To(Equal(filterFirstBlock.Int64()))
+		Expect(len(pepsRepository.BlockNumbers)).To(Equal(1))
+		Expect(pepsRepository.BlockNumbers[0]).To(Equal(filterFirstBlock.Int64()))
 	})
 
 	It("makes call for every missing block in range", func() {
@@ -100,7 +77,7 @@ var _ bool = Describe("pep updater", func() {
 		pepUpdater := everyblock.NewPepTransformer(db, blockchain)
 		firstBlock := filterFirstBlock.Int64()
 		int64s := []int64{firstBlock, firstBlock + 1, firstBlock + 2, firstBlock + 3, firstBlock + 4}
-		pepsRepository := &MockEveryBlockDataStore{missingBlocks: int64s}
+		pepsRepository := &test_helpers.MockEveryBlockDataStore{MissingBlocksData: int64s}
 		pepUpdater = &everyblock.Transformer{Repository: pepsRepository, Blockchain: blockchain}
 
 		pepUpdater.Execute()

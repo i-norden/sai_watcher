@@ -10,6 +10,15 @@ type DataStore struct {
 	DB *postgres.DB
 }
 
+func (ds DataStore) GetAllGovData() ([]GovModel, error) {
+	var results []GovModel
+	err := ds.DB.Select(&results, `SELECT block, tx, var, arg, guy, cap, mat, tax, fee, axe, gap FROM maker.gov`)
+	if err != nil {
+		return results, err
+	}
+	return results, nil
+}
+
 func (ds DataStore) CreateGov(govModel *GovModel, logID int64) error {
 	tx := govModel.Tx
 	var_ := govModel.Var

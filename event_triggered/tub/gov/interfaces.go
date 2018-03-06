@@ -13,4 +13,5 @@ type GovFetcherInterface interface {
 
 type Repository interface {
 	CreateGov(govModel *GovModel, logID int64) error
+	GetAllGovData() ([]GovModel, error)
 }
