@@ -1,0 +1,1 @@
+DROP TABLE maker.peps_everyblock;

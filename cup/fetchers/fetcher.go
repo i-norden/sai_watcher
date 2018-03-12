@@ -17,14 +17,14 @@ var (
 	ErrApiRequestFailed = errors.New("etherscan api request failed")
 )
 
-func NewFetcher(blockchain core.ContractDataFetcher) *Fetcher {
+func NewFetcher(blockchain core.Blockchain) *Fetcher {
 	return &Fetcher{
 		blockchain: blockchain,
 	}
 }
 
 type Fetcher struct {
-	blockchain core.ContractDataFetcher
+	blockchain core.Blockchain
 }
 
 type Cup struct {

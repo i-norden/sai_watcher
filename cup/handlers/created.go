@@ -14,20 +14,20 @@ import (
 )
 
 type CreatedHandler struct {
-	core.ContractDataFetcher
+	core.Blockchain
 	core.WatchedEvent
 	shared.Handler
 	cuprepo.ICupsRepository
 	repositories.WatchedEventRepository
 }
 
-func NewCreatedHandler(db *postgres.DB, blockchain core.ContractDataFetcher) shared.Handler {
+func NewCreatedHandler(db *postgres.DB, blockchain core.Blockchain) shared.Handler {
 	var updater shared.Handler
 	cr := cuprepo.CupsRepository{DB: db}
 	we := repositories.WatchedEventRepository{DB: db}
 	updater = &CreatedHandler{
 		ICupsRepository:        cr,
-		ContractDataFetcher:    blockchain,
+		Blockchain:             blockchain,
 		WatchedEventRepository: we,
 	}
 	fr := repositories.FilterRepository{DB: db}
@@ -54,7 +54,7 @@ func (u CreatedHandler) Execute() error {
 			log.Println("Error fetching events for filter: ", filter.Name)
 		}
 		for _, watchedEvent := range watchedEvents {
-			fetcher := fetchers.NewFetcher(u.ContractDataFetcher)
+			fetcher := fetchers.NewFetcher(u.Blockchain)
 			args := common.HexToHash(watchedEvent.Data)
 			cup, err := fetcher.FetchCupData(args, watchedEvent.BlockNumber)
 			if err != nil {

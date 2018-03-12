@@ -15,7 +15,7 @@ import (
 
 type DefaultHandler struct {
 	core.WatchedEvent
-	core.ContractDataFetcher
+	core.Blockchain
 	shared.Handler
 	cuprepo.ICupsRepository
 	repositories.FilterRepository
@@ -66,7 +66,7 @@ var cupsFilters = []filters.LogFilter{
 	},
 }
 
-func NewDefaultHandler(db *postgres.DB, blockchain core.ContractDataFetcher) shared.Handler {
+func NewDefaultHandler(db *postgres.DB, blockchain core.Blockchain) shared.Handler {
 	cr := cuprepo.CupsRepository{DB: db}
 	fr := repositories.FilterRepository{DB: db}
 	we := repositories.WatchedEventRepository{DB: db}
@@ -75,7 +75,7 @@ func NewDefaultHandler(db *postgres.DB, blockchain core.ContractDataFetcher) sha
 	}
 	return &DefaultHandler{
 		ICupsRepository:        cr,
-		ContractDataFetcher:    blockchain,
+		Blockchain:             blockchain,
 		FilterRepository:       fr,
 		WatchedEventRepository: we,
 	}
@@ -95,7 +95,7 @@ func (u DefaultHandler) Execute() error {
 }
 
 func createCupData(u DefaultHandler, watchedEvent *core.WatchedEvent) {
-	fetcher := fetchers.NewFetcher(u.ContractDataFetcher)
+	fetcher := fetchers.NewFetcher(u.Blockchain)
 	args := common.HexToHash(watchedEvent.Topic2)
 	cup, err := fetcher.FetchCupData(args, watchedEvent.BlockNumber)
 	if err != nil {

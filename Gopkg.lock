@@ -28,6 +28,7 @@
     "crypto/secp256k1",
     "crypto/sha3",
     "ethclient",
+    "ethdb",
     "event",
     "log",
     "metrics",
@@ -41,8 +42,8 @@
     "rpc",
     "trie"
   ]
-  revision = "4bb3c89d44e372e6a9ab85a8be0c9345265c763a"
-  version = "v1.7.3"
+  revision = "b8b9f7f4476a30a0aaf6077daade6ae77f969960"
+  version = "v1.8.2"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -222,15 +223,6 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/rcrowley/go-metrics"
-  packages = [
-    ".",
-    "exp"
-  ]
-  revision = "8732c616f52954686704c8645fe1a9d59e9df7c1"
-
-[[projects]]
   name = "github.com/rs/cors"
   packages = ["."]
   revision = "feef513b9575b32f84bafa580aad89b011259019"
@@ -295,7 +287,7 @@
   revision = "c7a14d4b00e222eab6111b4cd1af829c13f53ec2"
 
 [[projects]]
-  branch = "custom_handlers"
+  branch = "master"
   name = "github.com/vulcanize/vulcanizedb"
   packages = [
     "libraries/shared",
@@ -309,7 +301,7 @@
     "pkg/geth/node",
     "pkg/history"
   ]
-  revision = "0854619e66151c83301f22359ac5e56bb10cdf0f"
+  revision = "a6263341a1b3fc8e8f4b834951d7a453832d24b8"
   source = "https://github.com/vulcanize/vulcanizedb"
 
 [[projects]]
@@ -384,6 +376,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fb2f6f8046cada3fb78dce9bade7fad56b527700743efe764545f1f9d6cae00c"
+  inputs-digest = "be137443db6bbdec263eeb4a03cdbef9d5b93bb70956ab2c05f46c0025268495"
   solver-name = "gps-cdcl"
   solver-version = 1

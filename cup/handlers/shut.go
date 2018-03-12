@@ -16,7 +16,7 @@ import (
 type ShutHandler struct {
 	core.WatchedEvent
 	shared.Handler
-	core.ContractDataFetcher
+	core.Blockchain
 	cuprepo.ICupsRepository
 	repositories.WatchedEventRepository
 }
@@ -31,13 +31,13 @@ var shutFilters = []filters.LogFilter{
 	},
 }
 
-func NewShutHandler(db *postgres.DB, blockchain core.ContractDataFetcher) shared.Handler {
+func NewShutHandler(db *postgres.DB, blockchain core.Blockchain) shared.Handler {
 	var updater shared.Handler
 	cr := cuprepo.CupsRepository{DB: db}
 	we := repositories.WatchedEventRepository{DB: db}
 	updater = &ShutHandler{
 		ICupsRepository:        cr,
-		ContractDataFetcher:    blockchain,
+		Blockchain:             blockchain,
 		WatchedEventRepository: we,
 	}
 	fr := repositories.FilterRepository{DB: db}
@@ -61,7 +61,7 @@ func (u ShutHandler) Execute() error {
 }
 
 func shutCup(u ShutHandler, watchedEvent *core.WatchedEvent) {
-	fetcher := fetchers.NewFetcher(u.ContractDataFetcher)
+	fetcher := fetchers.NewFetcher(u.Blockchain)
 	args := common.HexToHash(watchedEvent.Topic2)
 	cup, err := fetcher.FetchCupData(args, watchedEvent.BlockNumber)
 	if err != nil {
