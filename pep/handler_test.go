@@ -57,6 +57,22 @@ func (MockWatchedEventsRepository) GetWatchedEvents(name string) ([]*core.Watche
 
 type FakePepFetcher struct{}
 
+func (FakePepFetcher) GetBlockByNumber(blockNumber int64) core.Block {
+	panic("implement me")
+}
+
+func (FakePepFetcher) GetLogs(contract core.Contract, startingBlockNumber *big.Int, endingBlockNumber *big.Int) ([]core.Log, error) {
+	panic("implement me")
+}
+
+func (FakePepFetcher) Node() core.Node {
+	panic("implement me")
+}
+
+func (FakePepFetcher) LastBlock() *big.Int {
+	panic("implement me")
+}
+
 func (FakePepFetcher) GetContractOutput(address string, input []byte, blockNumber int64) ([]byte, error) {
 	panic("implement me")
 }

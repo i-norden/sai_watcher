@@ -26,7 +26,7 @@ var pepsFilters = []filters.LogFilter{
 	},
 }
 
-func NewPepHandler(db *postgres.DB, blockchain core.ContractDataFetcher) shared.Handler {
+func NewPepHandler(db *postgres.DB, blockchain core.Blockchain) shared.Handler {
 	var handler shared.Handler
 	pr := PepsRepository{DB: db}
 	we := repositories.WatchedEventRepository{DB: db}

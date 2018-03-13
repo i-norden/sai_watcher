@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/geth"
 )
 
@@ -20,6 +21,22 @@ type fakeCupDataFetcher struct {
 	methodArgs   []interface{}
 	results      []interface{}
 	blocknumbers []int64
+}
+
+func (cdf *fakeCupDataFetcher) GetBlockByNumber(blockNumber int64) core.Block {
+	panic("implement me")
+}
+
+func (cdf *fakeCupDataFetcher) GetLogs(contract core.Contract, startingBlockNumber *big.Int, endingBlockNumber *big.Int) ([]core.Log, error) {
+	panic("implement me")
+}
+
+func (cdf *fakeCupDataFetcher) Node() core.Node {
+	panic("implement me")
+}
+
+func (cdf *fakeCupDataFetcher) LastBlock() *big.Int {
+	panic("implement me")
 }
 
 func (cdf *fakeCupDataFetcher) GetContractOutput(address string, input []byte, blockNumber int64) ([]byte, error) {

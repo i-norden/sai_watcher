@@ -30,10 +30,6 @@
   unused-packages = true
 
 [[constraint]]
-  name = "github.com/ethereum/go-ethereum"
-  branch = "release/1.7"
-
-[[constraint]]
   name = "github.com/vulcanize/vulcanizedb"
   source = "https://github.com/vulcanize/vulcanizedb"
 

@@ -91,6 +91,37 @@ CREATE TABLE peps (
 
 
 --
+-- Name: peps_everyblock; Type: TABLE; Schema: maker; Owner: -
+--
+
+CREATE TABLE peps_everyblock (
+    id integer NOT NULL,
+    block_number integer,
+    value character varying
+);
+
+
+--
+-- Name: peps_everyblock_id_seq; Type: SEQUENCE; Schema: maker; Owner: -
+--
+
+CREATE SEQUENCE peps_everyblock_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: peps_everyblock_id_seq; Type: SEQUENCE OWNED BY; Schema: maker; Owner: -
+--
+
+ALTER SEQUENCE peps_everyblock_id_seq OWNED BY peps_everyblock.id;
+
+
+--
 -- Name: peps_id_seq; Type: SEQUENCE; Schema: maker; Owner: -
 --
 
@@ -155,7 +186,7 @@ CREATE TABLE blocks (
     hash character varying(66),
     nonce character varying(20),
     parenthash character varying(66),
-    size bigint,
+    size character varying,
     uncle_hash character varying(66),
     node_id integer NOT NULL,
     is_final boolean,
@@ -431,6 +462,13 @@ ALTER TABLE ONLY cups ALTER COLUMN id SET DEFAULT nextval('cups_id_seq'::regclas
 --
 
 ALTER TABLE ONLY peps ALTER COLUMN id SET DEFAULT nextval('peps_id_seq'::regclass);
+
+
+--
+-- Name: peps_everyblock id; Type: DEFAULT; Schema: maker; Owner: -
+--
+
+ALTER TABLE ONLY peps_everyblock ALTER COLUMN id SET DEFAULT nextval('peps_everyblock_id_seq'::regclass);
 
 
 SET search_path = public, pg_catalog;
