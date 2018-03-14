@@ -64,5 +64,27 @@ var _ = Describe("Peps Repository", func() {
 
 			Expect(result.BlockNumber).To(Equal(int64(10)))
 		})
+		It("returns values that do not have a record within a block range", func() {
+			pip := everyblock.Peek{}
+			pep := everyblock.Peek{}
+			per := everyblock.Per{}
+			err = pepsRepository.Create(0, pep, pip, per)
+			Expect(err).ToNot(HaveOccurred())
+			err = pepsRepository.Create(1, pep, pip, per)
+			Expect(err).ToNot(HaveOccurred())
+			err = pepsRepository.Create(2, pep, pip, per)
+			Expect(err).ToNot(HaveOccurred())
+			err = pepsRepository.Create(3, pep, pip, per)
+			Expect(err).ToNot(HaveOccurred())
+			err = pepsRepository.Create(4, pep, pip, per)
+			Expect(err).ToNot(HaveOccurred())
+
+			result, err := pepsRepository.MissingBlocks(int64(0), int64(10))
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(err).ToNot(HaveOccurred())
+			missingBlocks := []int64{5, 6, 7, 8, 9, 10}
+			Expect(result).To(Equal(missingBlocks))
+		})
 	})
 })

@@ -12,10 +12,15 @@ import (
 )
 
 type MockEveryBlockDataStore struct {
-	peps         []everyblock.Peek
-	pips         []everyblock.Peek
-	pers         []everyblock.Per
-	blockNumbers []int64
+	peps          []everyblock.Peek
+	pips          []everyblock.Peek
+	pers          []everyblock.Per
+	blockNumbers  []int64
+	missingBlocks []int64
+}
+
+func (mpr *MockEveryBlockDataStore) MissingBlocks(startingBlockNumber int64, highestBlockNumber int64) ([]int64, error) {
+	return mpr.missingBlocks, nil
 }
 
 func (mpr *MockEveryBlockDataStore) Get(blockNumber int64) (*everyblock.Row, error) {
@@ -55,7 +60,7 @@ func (fakePepFetcher FakeBlockchain) LastBlock() *big.Int {
 	return fakePepFetcher.lastBlock
 }
 
-var filterFirstBlock = big.NewInt(everyblock.PepsFilters[0].FromBlock)
+var filterFirstBlock = big.NewInt(everyblock.PepsFilter.FromBlock)
 
 var _ bool = Describe("pep updater", func() {
 	var db *postgres.DB
@@ -76,7 +81,8 @@ var _ bool = Describe("pep updater", func() {
 	It("retrieves a pep for a single block", func() {
 		pepUpdater := everyblock.NewPepHandler(db, &FakeBlockchain{})
 		blockchain := &fakeContractDataFetcher{lastBlock: filterFirstBlock}
-		pepsRepository := &MockEveryBlockDataStore{}
+		int64s := []int64{filterFirstBlock.Int64()}
+		pepsRepository := &MockEveryBlockDataStore{missingBlocks: int64s}
 		pepUpdater = &everyblock.Handler{
 			Repository: pepsRepository,
 			Blockchain: blockchain,
@@ -88,18 +94,20 @@ var _ bool = Describe("pep updater", func() {
 		Expect(pepsRepository.blockNumbers[0]).To(Equal(filterFirstBlock.Int64()))
 	})
 
-	It("makes call for every block in filter range", func() {
-		lastBlock := filterFirstBlock.Int64() + 24
+	It("makes call for every missing block in range", func() {
+		lastBlock := filterFirstBlock.Int64() + 5
 		blockchain := &fakeContractDataFetcher{lastBlock: big.NewInt(lastBlock)}
 		pepUpdater := everyblock.NewPepHandler(db, blockchain)
-		pepsRepository := &MockEveryBlockDataStore{}
+		firstBlock := filterFirstBlock.Int64()
+		int64s := []int64{firstBlock, firstBlock + 1, firstBlock + 2, firstBlock + 3, firstBlock + 4}
+		pepsRepository := &MockEveryBlockDataStore{missingBlocks: int64s}
 		pepUpdater = &everyblock.Handler{Repository: pepsRepository, Blockchain: blockchain}
 
 		pepUpdater.Execute()
 
 		Expect(err).ToNot(HaveOccurred())
-		// 25 * 3 handler calls per block
-		Expect(len(blockchain.blocknumbers)).To(Equal(75))
+		// 5 * 3 handler calls per block
+		Expect(len(blockchain.blocknumbers)).To(Equal(15))
 
 	})
 })
