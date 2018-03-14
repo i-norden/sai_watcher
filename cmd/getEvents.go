@@ -3,9 +3,7 @@ package cmd
 import (
 	"log"
 
-	"github.com/8thlight/sai_watcher/cup"
-	"github.com/8thlight/sai_watcher/pep"
-	"github.com/8thlight/sai_watcher/pep_everyblock"
+	"github.com/8thlight/sai_watcher/everyblock"
 	"github.com/spf13/cobra"
 	"github.com/vulcanize/vulcanizedb/libraries/shared"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
@@ -41,8 +39,6 @@ func getEvents() {
 		DB:         *db,
 		Blockchain: blockchain,
 	}
-	watcher.AddHandlers(pep.HandlerInitializers())
-	watcher.AddHandlers(cup.HandlerInitializers())
-	watcher.AddHandlers(peps_everyblock.HandlerInitializers())
+	watcher.AddHandlers(everyblock.HandlerInitializers())
 	watcher.Execute()
 }

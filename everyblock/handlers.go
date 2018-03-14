@@ -1,4 +1,4 @@
-package pep
+package everyblock
 
 import (
 	"github.com/vulcanize/vulcanizedb/libraries/shared"

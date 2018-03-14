@@ -96,8 +96,10 @@ CREATE TABLE peps (
 
 CREATE TABLE peps_everyblock (
     id integer NOT NULL,
-    block_number integer,
-    value character varying
+    block_number integer NOT NULL,
+    pep numeric,
+    pip numeric,
+    per numeric
 );
 
 

@@ -1,4 +1,4 @@
-package pep_test
+package everyblock_test
 
 import (
 	"testing"
@@ -9,5 +9,5 @@ import (
 
 func TestPep(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Pep Suite")
+	RunSpecs(t, "Pep Every Block Suite")
 }

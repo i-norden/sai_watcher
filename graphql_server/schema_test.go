@@ -6,6 +6,9 @@ import (
 
 	"encoding/json"
 
+	"math/big"
+
+	"github.com/8thlight/sai_watcher/everyblock"
 	"github.com/8thlight/sai_watcher/graphql_server"
 	"github.com/neelance/graphql-go"
 	. "github.com/onsi/ginkgo"
@@ -13,8 +16,6 @@ import (
 	"github.com/vulcanize/vulcanizedb/pkg/config"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
-	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres/repositories"
-	"github.com/vulcanize/vulcanizedb/pkg/filters"
 )
 
 func formatJSON(data []byte) []byte {
@@ -29,8 +30,19 @@ func formatJSON(data []byte) []byte {
 	return formatted
 }
 
-var _ = Describe("GraphQL", func() {
+func convertHelper(method string, input [32]byte, precsion int) string {
+	converted := big.NewInt(0)
+	converted.SetBytes(input[:])
+	return everyblock.Convert(method, converted.String(), precsion)
+}
+
+var _ bool = Describe("GraphQL", func() {
 	var graphQLRepositories graphql_server.GraphQLRepositories
+	var zero [32]byte
+	var one [32]byte
+	var pep everyblock.Peek
+	var pip everyblock.Peek
+	var per everyblock.Per
 
 	BeforeEach(func() {
 		node := core.Node{GenesisBlock: "GENESIS", NetworkID: 1, ID: "x123", ClientName: "geth"}
@@ -42,82 +54,53 @@ var _ = Describe("GraphQL", func() {
 		Expect(err).NotTo(HaveOccurred())
 		db.Query(`DELETE FROM maker.cups`)
 		db.Query(`DELETE FROM maker.peps`)
+		db.Query(`DELETE FROM maker.peps_everyblock`)
 		db.Query(`DELETE FROM logs`)
 		db.Query(`DELETE FROM log_filters`)
-		blockRepository := &repositories.BlockRepository{DB: db}
-		logRepository := &repositories.LogRepository{DB: db}
-		filterRepository := &repositories.FilterRepository{DB: db}
-		watchedEventRepository := &repositories.WatchedEventRepository{DB: db}
+		ebds := everyblock.DataStore{DB: db}
 		graphQLRepositories = graphql_server.GraphQLRepositories{
-			WatchedEventRepository: watchedEventRepository,
-			BlockRepository:        blockRepository,
-			LogRepository:          logRepository,
-			FilterRepository:       filterRepository,
+			Everyblock: ebds,
 		}
+		zero = [32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+		one = [32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
+		pep = everyblock.Peek{Value: one, OK: false}
+		pip = everyblock.Peek{Value: zero, OK: false}
+		per = everyblock.Per{Value: big.NewInt(1)}
+		ebds.Create(1, pep, pip, per)
 
-		err = graphQLRepositories.CreateFilter(filters.LogFilter{
-			Name:      "TestFilter1",
-			FromBlock: 1,
-			ToBlock:   10,
-			Address:   "0x123456789",
-			Topics:    core.Topics{0: "topic=1", 2: "topic=2"},
-		})
-		if err != nil {
-			log.Fatal(err)
-		}
-		filter, err := graphQLRepositories.GetFilter("TestFilter1")
-		if err != nil {
-			log.Println(filter)
-			log.Fatal(err)
-		}
-
-		matchingEvent := core.Log{
-			BlockNumber: 5,
-			TxHash:      "0xTX1",
-			Address:     "0x123456789",
-			Topics:      core.Topics{0: "topic=1", 2: "topic=2"},
-			Index:       0,
-			Data:        "0xDATADATADATA",
-		}
-		nonMatchingEvent := core.Log{
-			BlockNumber: 5,
-			TxHash:      "0xTX2",
-			Address:     "0xOTHERADDRESS",
-			Topics:      core.Topics{0: "topic=1", 2: "topic=2"},
-			Index:       0,
-			Data:        "0xDATADATADATA",
-		}
-		err = graphQLRepositories.CreateLogs([]core.Log{matchingEvent, nonMatchingEvent})
-		if err != nil {
-			log.Fatal(err)
-		}
 	})
 
-	It("Queries example schema for specific log filter", func() {
+	It("Queries schema everyblock for a specific block number", func() {
 		var variables map[string]interface{}
 		resolver := graphql_server.NewResolver(graphQLRepositories)
 		var schema = graphql.MustParseSchema(graphql_server.Schema, resolver)
 		response := schema.Exec(context.Background(),
 			`{
-	                       logFilter(name: "TestFilter1") {
-	                           name
-	                           fromBlock
-	                           toBlock
-	                           address
-	                           topics
-	                        }
-	                      }`,
+                          everyblock(blockNumber: 1) {
+                             total
+                             rows {
+                                    blockNumber
+                                    per
+                                    pep
+                                    pip
+                                 }
+                           }
+                       }`,
 			"",
 			variables)
 		expected := `{
-	                   "logFilter": {
-						    "name": "TestFilter1",
-						    "fromBlock": 1,
-						    "toBlock": 10,
-	                       "address": "0x123456789",
-	                       "topics": ["topic=1", null, "topic=2", null]
-						}
-						 }`
+          "everyblock": {
+            "total": 1,
+            "rows": [
+              {
+                "blockNumber": 1,
+                "per": "0.000000000000000000000000001",
+                "pep": "0.000000000000000001",
+                "pip": "0"
+              }
+            ]
+          }
+        }`
 		var v interface{}
 		if len(response.Errors) != 0 {
 			log.Fatal(response.Errors)
@@ -129,56 +112,4 @@ var _ = Describe("GraphQL", func() {
 		Expect(actualJSON).To(Equal(expectedJSON))
 	})
 
-	It("Queries example schema for specific watched event log", func() {
-		var variables map[string]interface{}
-
-		resolver := graphql_server.NewResolver(graphQLRepositories)
-		var schema = graphql.MustParseSchema(graphql_server.Schema, resolver)
-		response := schema.Exec(context.Background(),
-			`{
-	                      watchedEvents(name: "TestFilter1") {
-	                       total
-	                       watchedEvents{
-	                           name
-	                           blockNumber
-	                           address
-	                           tx_hash
-	                           topic0
-	                           topic1
-	                           topic2
-	                           topic3
-	                           data
-	                         }
-	                       }
-	                   }`,
-			"",
-			variables)
-		expected := `{
-	                  "watchedEvents":
-	                     {
-	                       "total": 1,
-	                       "watchedEvents": [
-	                           {"name":"TestFilter1",
-	                            "blockNumber": 5,
-	                            "address": "0x123456789",
-	                            "tx_hash": "0xTX1",
-	                            "topic0": "topic=1",
-	                            "topic1": "",
-	                            "topic2": "topic=2",
-	                            "topic3": "",
-	                            "data": "0xDATADATADATA"
-	                           }
-	                       ]
-	                     }
-	               }`
-		var v interface{}
-		if len(response.Errors) != 0 {
-			log.Fatal(response.Errors)
-		}
-		err := json.Unmarshal(response.Data, &v)
-		Expect(err).ToNot(HaveOccurred())
-		actualJSON := formatJSON(response.Data)
-		expectedJSON := formatJSON([]byte(expected))
-		Expect(actualJSON).To(Equal(expectedJSON))
-	})
 })

@@ -18,13 +18,12 @@ import (
 	"log"
 	"net/http"
 
-	cupsRepo "github.com/8thlight/sai_watcher/cup/repositories"
+	"github.com/8thlight/sai_watcher/everyblock"
 	"github.com/8thlight/sai_watcher/graphql_server"
 	"github.com/neelance/graphql-go"
 	"github.com/neelance/graphql-go/relay"
 	"github.com/spf13/cobra"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
-	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres/repositories"
 	"github.com/vulcanize/vulcanizedb/pkg/geth"
 )
 
@@ -55,17 +54,8 @@ func parseSchema() *graphql.Schema {
 	if err != nil {
 		log.Fatal("Can't connect to db")
 	}
-	blockRepository := &repositories.BlockRepository{DB: db}
-	logRepository := &repositories.LogRepository{DB: db}
-	filterRepository := &repositories.FilterRepository{DB: db}
-	watchedEventRepository := &repositories.WatchedEventRepository{DB: db}
-	cupsRepository := &cupsRepo.CupsRepository{DB: db}
 	graphQLRepositories := graphql_server.GraphQLRepositories{
-		WatchedEventRepository: watchedEventRepository,
-		BlockRepository:        blockRepository,
-		LogRepository:          logRepository,
-		FilterRepository:       filterRepository,
-		ICupsRepository:        cupsRepository,
+		Everyblock: everyblock.DataStore{DB: db},
 	}
 	schema := graphql.MustParseSchema(graphql_server.Schema, graphql_server.NewResolver(graphQLRepositories))
 	return schema

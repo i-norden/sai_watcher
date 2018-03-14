@@ -1,11 +1,11 @@
-package peps_everyblock_test
+package everyblock_test
 
 import (
 	"path/filepath"
 
 	"math/big"
 
-	"github.com/8thlight/sai_watcher/pep_everyblock"
+	"github.com/8thlight/sai_watcher/everyblock"
 	"github.com/8thlight/sai_watcher/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -58,7 +58,7 @@ var _ = Describe("Medianizer Data Fetcher", func() {
 	Describe("Getting medianizer attributes", func() {
 		It("contract data fetcher with correct args", func() {
 			blockchain := &fakeContractDataFetcher{}
-			client := peps_everyblock.NewFetcher(blockchain)
+			client := everyblock.NewFetcher(blockchain)
 			blockNumber := int64(5136253)
 			var (
 				ret0 = new([32]byte)
@@ -69,11 +69,11 @@ var _ = Describe("Medianizer Data Fetcher", func() {
 				ret1,
 			}
 
-			_, err := client.FetchContractData(nil, blockNumber)
+			_, err := client.FetchPepData(nil, blockNumber)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(len(blockchain.abis)).To(Equal(1))
-			abiJSON, err := geth.ReadAbiFile(filepath.Join(utils.ProjectRoot(), "pep_everyblock", "medianizer.json"))
+			abiJSON, err := geth.ReadAbiFile(filepath.Join(utils.ProjectRoot(), "everyblock", "medianizer.json"))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(blockchain.abis[0]).To(Equal(abiJSON))
 			Expect(len(blockchain.addresses)).To(Equal(1))
@@ -93,13 +93,51 @@ var _ = Describe("Medianizer Data Fetcher", func() {
 
 	It("makes call to real blockchain", func() {
 		blockchain := geth.NewBlockchain(infuraIPC)
-		client := peps_everyblock.NewFetcher(blockchain)
+		client := everyblock.NewFetcher(blockchain)
 
-		result, err := client.FetchContractData(nil, 5136253)
+		result, err := client.FetchPepData(nil, 5136253)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(result.Value.Hex()).To(Equal("0x0000000000000000000000000000000000000000000000359d858309aa630800"))
 		Expect(result.Value.String()).To(Equal("989028058420000000000"))
 		Expect(result.OK).To(Equal(true))
+	})
+
+	Describe(" matching dai service values", func() {
+		var (
+			blockNumber int64 = 5237067
+			pip               = "703.57"
+			pep               = "817.88284690765"
+			per               = "1.0020921650678054"
+		)
+
+		It("returns the correct converted values for a real pep", func() {
+			blockchain := geth.NewBlockchain(infuraIPC)
+			client := everyblock.NewFetcher(blockchain)
+
+			result, err := client.FetchPepData(nil, blockNumber)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Wad()).To(Equal(pep))
+
+		})
+		It("returns the correct converted values for a real pip", func() {
+			blockchain := geth.NewBlockchain(infuraIPC)
+			client := everyblock.NewFetcher(blockchain)
+
+			result, err := client.FetchPipData(nil, blockNumber)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Wad()).To(Equal(pip))
+
+		})
+
+		It("returns the correct converted values for a real per", func() {
+			blockchain := geth.NewBlockchain(infuraIPC)
+			client := everyblock.NewFetcher(blockchain)
+
+			result, err := client.FetchPerData(nil, blockNumber)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Ray()).To(Equal(per))
+
+		})
 	})
 
 })

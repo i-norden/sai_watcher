@@ -1,7 +1,9 @@
-package peps_everyblock_test
+package everyblock_test
 
 import (
-	"github.com/8thlight/sai_watcher/pep_everyblock"
+	"math/big"
+
+	"github.com/8thlight/sai_watcher/everyblock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/vulcanize/vulcanizedb/pkg/config"
@@ -12,7 +14,7 @@ import (
 
 var _ = Describe("Peps Repository", func() {
 	var db *postgres.DB
-	var pepsRepository peps_everyblock.PepsRepository
+	var pepsRepository everyblock.DataStore
 	var logsRepository repositories.LogRepository
 	var filterRepository repositories.FilterRepository
 	var err error
@@ -29,29 +31,38 @@ var _ = Describe("Peps Repository", func() {
 		db.Query(`DELETE FROM maker.peps_everyblock`)
 		db.Query(`DELETE FROM logs`)
 		db.Query(`DELETE FROM log_filters`)
-		pepsRepository = peps_everyblock.PepsRepository{DB: db}
+		pepsRepository = everyblock.DataStore{DB: db}
 		logsRepository = repositories.LogRepository{DB: db}
 		filterRepository = repositories.FilterRepository{DB: db}
 	})
 
 	Describe("Creating a new pep record", func() {
 		It("inserts new pep peek result with data", func() {
-			pep := peps_everyblock.DBPeekResult{
-				Value: "10",
-				OK:    true,
+			wei := big.NewInt(0)
+			wei.SetString("1000000000000000000", 10)
+			ray := big.NewInt(0)
+			ray.SetString("10000000000000000000000000000", 10)
+			pip := everyblock.Peek{
+				Value: everyblock.Value{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+				OK:    false,
 			}
-			err = pepsRepository.CreatePep(pep.Value, 10)
+			pep := everyblock.Peek{
+				Value: everyblock.Value{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+				OK:    false,
+			}
+			per := everyblock.Per{Value: ray}
+			err = pepsRepository.Create(10, pep, pip, per)
 			Expect(err).ToNot(HaveOccurred())
 
-			var id int64
-			var logId int64
-			var blockNumber int64
-			err = pepsRepository.DB.QueryRow(`SELECT id, block_number FROM maker.peps_everyblock`).
-				Scan(&id, &blockNumber)
+			result, err := pepsRepository.Get(int64(10))
+
 			Expect(err).ToNot(HaveOccurred())
-			Expect(id).ToNot(BeNil())
-			Expect(logId).ToNot(BeNil())
-			Expect(blockNumber).To(Equal(int64(10)))
+			Expect(result.ID).ToNot(BeNil())
+			Expect(result.Pep).To(Equal(big.NewRat(1, 1e18).FloatString(18)))
+			Expect(result.Pip).To(Equal(big.NewRat(2, 1e18).FloatString(18)))
+			Expect(result.Per).To(Equal("10"))
+
+			Expect(result.BlockNumber).To(Equal(int64(10)))
 		})
 	})
 })
