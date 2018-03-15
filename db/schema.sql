@@ -42,55 +42,6 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: cups; Type: TABLE; Schema: maker; Owner: -
---
-
-CREATE TABLE cups (
-    log_id integer,
-    id integer NOT NULL,
-    cup_index numeric,
-    lad character varying(42),
-    ink numeric,
-    art numeric,
-    irk numeric,
-    block_number numeric,
-    is_closed boolean
-);
-
-
---
--- Name: cups_id_seq; Type: SEQUENCE; Schema: maker; Owner: -
---
-
-CREATE SEQUENCE cups_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: cups_id_seq; Type: SEQUENCE OWNED BY; Schema: maker; Owner: -
---
-
-ALTER SEQUENCE cups_id_seq OWNED BY cups.id;
-
-
---
--- Name: peps; Type: TABLE; Schema: maker; Owner: -
---
-
-CREATE TABLE peps (
-    id integer NOT NULL,
-    log_id integer,
-    block_number integer,
-    value numeric
-);
-
-
---
 -- Name: peps_everyblock; Type: TABLE; Schema: maker; Owner: -
 --
 
@@ -121,26 +72,6 @@ CREATE SEQUENCE peps_everyblock_id_seq
 --
 
 ALTER SEQUENCE peps_everyblock_id_seq OWNED BY peps_everyblock.id;
-
-
---
--- Name: peps_id_seq; Type: SEQUENCE; Schema: maker; Owner: -
---
-
-CREATE SEQUENCE peps_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: peps_id_seq; Type: SEQUENCE OWNED BY; Schema: maker; Owner: -
---
-
-ALTER SEQUENCE peps_id_seq OWNED BY peps.id;
 
 
 SET search_path = public, pg_catalog;
@@ -453,20 +384,6 @@ CREATE VIEW watched_event_logs AS
 SET search_path = maker, pg_catalog;
 
 --
--- Name: cups id; Type: DEFAULT; Schema: maker; Owner: -
---
-
-ALTER TABLE ONLY cups ALTER COLUMN id SET DEFAULT nextval('cups_id_seq'::regclass);
-
-
---
--- Name: peps id; Type: DEFAULT; Schema: maker; Owner: -
---
-
-ALTER TABLE ONLY peps ALTER COLUMN id SET DEFAULT nextval('peps_id_seq'::regclass);
-
-
---
 -- Name: peps_everyblock id; Type: DEFAULT; Schema: maker; Owner: -
 --
 
@@ -653,26 +570,6 @@ CREATE INDEX tx_from_index ON transactions USING btree (tx_from);
 
 CREATE INDEX tx_to_index ON transactions USING btree (tx_to);
 
-
-SET search_path = maker, pg_catalog;
-
---
--- Name: cups log_index_fk; Type: FK CONSTRAINT; Schema: maker; Owner: -
---
-
-ALTER TABLE ONLY cups
-    ADD CONSTRAINT log_index_fk FOREIGN KEY (log_id) REFERENCES public.logs(id) ON DELETE CASCADE;
-
-
---
--- Name: peps log_index_fk; Type: FK CONSTRAINT; Schema: maker; Owner: -
---
-
-ALTER TABLE ONLY peps
-    ADD CONSTRAINT log_index_fk FOREIGN KEY (log_id) REFERENCES public.logs(id) ON DELETE CASCADE;
-
-
-SET search_path = public, pg_catalog;
 
 --
 -- Name: transactions blocks_fk; Type: FK CONSTRAINT; Schema: public; Owner: -

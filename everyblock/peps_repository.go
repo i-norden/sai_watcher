@@ -11,6 +11,24 @@ type DataStore struct {
 type Repository interface {
 	Create(blockNumber int64, pep Peek, pip Peek, per Per) error
 	Get(blockNumber int64) (*Row, error)
+	MissingBlocks(startingBlockNumber int64, highestBlockNumber int64) ([]int64, error)
+}
+
+func (ebds DataStore) MissingBlocks(startingBlockNumber int64, highestBlockNumber int64) ([]int64, error) {
+	numbers := make([]int64, 0)
+	err := ebds.DB.Select(&numbers,
+		`SELECT all_block_numbers
+            FROM (
+                SELECT generate_series($1::INT, $2::INT) AS all_block_numbers) series
+                LEFT JOIN maker.peps_everyblock
+                    ON block_number = all_block_numbers
+            WHERE block_number ISNULL`,
+		startingBlockNumber,
+		highestBlockNumber)
+	if err != nil {
+		return []int64{}, err
+	}
+	return numbers, err
 }
 
 func (ebds DataStore) Create(blockNumber int64, pep Peek, pip Peek, per Per) error {

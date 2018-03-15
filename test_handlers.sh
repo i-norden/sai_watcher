@@ -9,7 +9,6 @@ make migrate NAME=vulcanize_public
 
 #pep
 go build
-./sai_watcher sync --config environments/public.toml --starting-block-number 5177370 &
-./sai_watcher sync --config environments/public.toml --starting-block-number 5176992 &
+#./sai_watcher sync --config environments/public.toml --starting-block-number 5260217 &
 sleep 15
 ./sai_watcher getEvents --config environments/infura.toml 

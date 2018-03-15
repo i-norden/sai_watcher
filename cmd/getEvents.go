@@ -3,6 +3,8 @@ package cmd
 import (
 	"log"
 
+	"time"
+
 	"github.com/8thlight/sai_watcher/everyblock"
 	"github.com/spf13/cobra"
 	"github.com/vulcanize/vulcanizedb/libraries/shared"
@@ -30,6 +32,8 @@ func init() {
 }
 
 func getEvents() {
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
 	blockchain := geth.NewBlockchain(ipc)
 	db, err := postgres.NewDB(databaseConfig, blockchain.Node())
 	if err != nil {
@@ -40,5 +44,8 @@ func getEvents() {
 		Blockchain: blockchain,
 	}
 	watcher.AddHandlers(everyblock.HandlerInitializers())
-	watcher.Execute()
+	for range ticker.C {
+		watcher.Execute()
+	}
+
 }
