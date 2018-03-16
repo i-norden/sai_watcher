@@ -1,4 +1,5 @@
 CREATE TYPE maker.act AS ENUM (
+    'give',
     'open',
     'join',
     'exit',

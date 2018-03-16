@@ -11,7 +11,7 @@ func ConvertToModel(entity CupActionEntity) CupActionModel {
 		ID:              shared.HexToInt64(entity.ID),
 		TransactionHash: entity.TransactionHash,
 		Act:             entity.Act,
-		Arg:             utils.Arg(entity.Arg),
+		Arg:             Arg(entity.Arg, entity.Act),
 		Lad:             common.HexToAddress(entity.Lad).Hex(),
 		Ink:             utils.Convert("wad", entity.Ink, 17),
 		Art:             utils.Convert("wad", entity.Art, 17),
@@ -19,4 +19,11 @@ func ConvertToModel(entity CupActionEntity) CupActionModel {
 		Block:           entity.Block,
 		Deleted:         entity.Deleted,
 	}
+}
+
+func Arg(s string, act string) string {
+	if act == "give" {
+		return s
+	}
+	return utils.Arg(s)
 }

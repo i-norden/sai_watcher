@@ -1,2 +1,2 @@
-DROP TYPE maker.act
-DROP TABLE maker.cup_action
+DROP TYPE maker.act;
+DROP TABLE maker.cup_action;
