@@ -8,7 +8,7 @@ Setup Postgres and Geth - see [VulcanizeDB README](https://github.com/vulcanize/
 
 `./sai_watcher sync --config environments/public.toml --starting-block-number n` (where n is a recent enough block to fetch contract data with your node)
 
-`./sai_watcher get_events --config environments/public.toml`
+`./sai_watcher getEvents --config environments/public.toml`
 
 `./sai_watcher graphql --config environments/public.toml`
 

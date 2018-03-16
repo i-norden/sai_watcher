@@ -5,6 +5,7 @@ import (
 
 	"time"
 
+	"github.com/8thlight/sai_watcher/event_triggered"
 	"github.com/8thlight/sai_watcher/everyblock"
 	"github.com/spf13/cobra"
 	"github.com/vulcanize/vulcanizedb/libraries/shared"
@@ -43,6 +44,7 @@ func getEvents() {
 		DB:         *db,
 		Blockchain: blockchain,
 	}
+	watcher.AddHandlers(event_triggered.HandlerInitializers())
 	watcher.AddHandlers(everyblock.HandlerInitializers())
 	for range ticker.C {
 		watcher.Execute()

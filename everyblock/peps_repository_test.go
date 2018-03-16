@@ -26,8 +26,6 @@ var _ = Describe("Peps Repository", func() {
 			Port:     5432,
 		}, core.Node{})
 		Expect(err).NotTo(HaveOccurred())
-		db.Query(`DELETE FROM maker.cups`)
-		db.Query(`DELETE FROM maker.peps`)
 		db.Query(`DELETE FROM maker.peps_everyblock`)
 		db.Query(`DELETE FROM logs`)
 		db.Query(`DELETE FROM log_filters`)

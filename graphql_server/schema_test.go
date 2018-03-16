@@ -10,6 +10,7 @@ import (
 
 	"github.com/8thlight/sai_watcher/everyblock"
 	"github.com/8thlight/sai_watcher/graphql_server"
+	"github.com/8thlight/sai_watcher/utils"
 	"github.com/neelance/graphql-go"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -33,7 +34,7 @@ func formatJSON(data []byte) []byte {
 func convertHelper(method string, input [32]byte, precsion int) string {
 	converted := big.NewInt(0)
 	converted.SetBytes(input[:])
-	return everyblock.Convert(method, converted.String(), precsion)
+	return utils.Convert(method, converted.String(), precsion)
 }
 
 var _ bool = Describe("GraphQL", func() {

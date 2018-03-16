@@ -11,14 +11,6 @@ import (
 	"github.com/vulcanize/vulcanizedb/pkg/geth"
 )
 
-var Ether *big.Float
-var Ray *big.Float
-
-func init() {
-	Ether = big.NewFloat(1e18)
-	Ray = big.NewFloat(1e27)
-}
-
 func NewFetcher(blockchain core.Blockchain) *Fetcher {
 	return &Fetcher{
 		blockchain: blockchain,
@@ -40,20 +32,8 @@ func newResult(value [32]byte, ok bool) *Peek {
 	return &Peek{Value: value, OK: ok}
 }
 
-func Convert(conversion string, value string, prec int) string {
-	var bgflt = big.NewFloat(0.0)
-	bgflt.SetString(value)
-	switch conversion {
-	case "ray":
-		bgflt.Quo(bgflt, Ray)
-	case "wad":
-		bgflt.Quo(bgflt, Ether)
-	}
-	return bgflt.Text('g', prec)
-}
-
 func (peek Peek) Wad() string {
-	return Convert("wad", peek.Value.String(), 15)
+	return utils.Convert("wad", peek.Value.String(), 15)
 }
 
 func (value Value) Hex() string {
@@ -68,7 +48,7 @@ func (value Value) String() string {
 func (gethCupDateFetcher *Fetcher) FetchPepData(methodArg interface{}, blockNumber int64) (*Peek, error) {
 	abiPath := filepath.Join(utils.ProjectRoot(), "everyblock", "medianizer.json")
 	abiJSON, err := geth.ReadAbiFile(abiPath)
-	address := "0x99041f808d598b782d5a3e498681c2452a31da08"
+	pepAddress := "0x99041f808d598b782d5a3e498681c2452a31da08"
 	method := "peek"
 	var (
 		ret0 = new([32]byte)
@@ -78,7 +58,7 @@ func (gethCupDateFetcher *Fetcher) FetchPepData(methodArg interface{}, blockNumb
 		ret0,
 		ret1,
 	}
-	err = gethCupDateFetcher.blockchain.FetchContractData(abiJSON, address, method, methodArg, r, blockNumber)
+	err = gethCupDateFetcher.blockchain.FetchContractData(abiJSON, pepAddress, method, methodArg, r, blockNumber)
 	result := newResult(*ret0, *ret1)
 	return result, err
 }
@@ -86,7 +66,7 @@ func (gethCupDateFetcher *Fetcher) FetchPepData(methodArg interface{}, blockNumb
 func (gethCupDateFetcher *Fetcher) FetchPipData(methodArg interface{}, blockNumber int64) (*Peek, error) {
 	abiPath := filepath.Join(utils.ProjectRoot(), "everyblock", "medianizer.json")
 	abiJSON, err := geth.ReadAbiFile(abiPath)
-	address := "0x729D19f657BD0614b4985Cf1D82531c67569197B"
+	pipAddress := "0x729d19f657bd0614b4985cf1d82531c67569197b"
 	method := "peek"
 	var (
 		ret0 = new([32]byte)
@@ -96,7 +76,7 @@ func (gethCupDateFetcher *Fetcher) FetchPipData(methodArg interface{}, blockNumb
 		ret0,
 		ret1,
 	}
-	err = gethCupDateFetcher.blockchain.FetchContractData(abiJSON, address, method, methodArg, r, blockNumber)
+	err = gethCupDateFetcher.blockchain.FetchContractData(abiJSON, pipAddress, method, methodArg, r, blockNumber)
 	result := newResult(*ret0, *ret1)
 	return result, err
 }
@@ -106,15 +86,15 @@ type Per struct {
 }
 
 func (per Per) Ray() string {
-	return Convert("ray", per.Value.String(), 17)
+	return utils.Convert("ray", per.Value.String(), 17)
 }
 
 func (gethCupDateFetcher *Fetcher) FetchPerData(methodArg interface{}, blockNumber int64) (*Per, error) {
 	abiPath := filepath.Join(utils.ProjectRoot(), "everyblock", "tub.json")
 	abiJSON, err := geth.ReadAbiFile(abiPath)
-	address := "0x448a5065aebb8e423f0896e6c5d525c040f59af3"
+	perAddress := "0x448a5065aebb8e423f0896e6c5d525c040f59af3"
 	method := "per"
 	var result = new(big.Int)
-	err = gethCupDateFetcher.blockchain.FetchContractData(abiJSON, address, method, methodArg, &result, blockNumber)
+	err = gethCupDateFetcher.blockchain.FetchContractData(abiJSON, perAddress, method, methodArg, &result, blockNumber)
 	return &Per{Value: result}, err
 }
