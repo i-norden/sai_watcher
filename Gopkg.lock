@@ -301,7 +301,7 @@
     "pkg/geth/node",
     "pkg/history"
   ]
-  revision = "a6263341a1b3fc8e8f4b834951d7a453832d24b8"
+  revision = "201d9bcc911ef76ab9b6317e56618d49f2528094"
   source = "https://github.com/vulcanize/vulcanizedb"
 
 [[projects]]

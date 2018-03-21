@@ -44,8 +44,8 @@ func getEvents() {
 		DB:         *db,
 		Blockchain: blockchain,
 	}
-	watcher.AddHandlers(event_triggered.HandlerInitializers())
-	watcher.AddHandlers(everyblock.HandlerInitializers())
+	watcher.AddTransformers(event_triggered.TransformerInitializers())
+	watcher.AddTransformers(everyblock.TransformerInitializers())
 	for range ticker.C {
 		watcher.Execute()
 	}

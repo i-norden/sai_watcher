@@ -74,7 +74,6 @@ checkdbvars:
 	test -n "$(NAME)" # $$NAME
 	@echo $(CONNECT_STRING)
 
-
 .PHONY: rollback
 rollback: $(MIGRATE) checkdbvars
 	$(MIGRATE) -database $(CONNECT_STRING) -path ./db/migrations down 1
@@ -89,4 +88,3 @@ migrate: $(MIGRATE) checkdbvars
 import:
 	test -n "$(NAME)" # $$NAME
 	psql $(NAME) < db/schema.sql
-

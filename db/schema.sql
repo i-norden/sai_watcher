@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 10.2
--- Dumped by pg_dump version 10.2
+-- Dumped from database version 10.1
+-- Dumped by pg_dump version 10.1
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -75,6 +75,26 @@ CREATE TABLE cup_action (
     ire numeric DEFAULT 0 NOT NULL,
     block integer NOT NULL,
     deleted boolean DEFAULT false
+);
+
+
+--
+-- Name: gov; Type: TABLE; Schema: maker; Owner: -
+--
+
+CREATE TABLE gov (
+    log_id integer,
+    block integer NOT NULL,
+    tx character varying(66) NOT NULL,
+    var character varying(15),
+    arg numeric,
+    guy character varying(42),
+    cap numeric,
+    mat numeric,
+    tax numeric,
+    fee numeric,
+    axe numeric,
+    gap numeric
 );
 
 

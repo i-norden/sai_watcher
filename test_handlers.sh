@@ -7,8 +7,7 @@ ${VULCANIZE_DIR}/test_scripts/fresh_vulcanize.sh
 psql vulcanize_public -c "drop table schema_migrations;"
 make migrate NAME=vulcanize_public
 
-#pep
 go build
-#./sai_watcher sync --config environments/public.toml --starting-block-number 5260217 &
+./sai_watcher sync --config environments/public.toml --starting-block-number 4752014 &
 sleep 15
 ./sai_watcher getEvents --config environments/infura.toml 

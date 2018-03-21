@@ -1,12 +1,9 @@
 package everyblock_test
 
 import (
-	"path/filepath"
-
 	"math/big"
 
 	"github.com/8thlight/sai_watcher/everyblock"
-	"github.com/8thlight/sai_watcher/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
@@ -73,7 +70,7 @@ var _ = Describe("Medianizer Data Fetcher", func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(len(blockchain.abis)).To(Equal(1))
-			abiJSON, err := geth.ReadAbiFile(filepath.Join(utils.ProjectRoot(), "everyblock", "medianizer.json"))
+			abiJSON := everyblock.MedianizerABI
 			Expect(err).NotTo(HaveOccurred())
 			Expect(blockchain.abis[0]).To(Equal(abiJSON))
 			Expect(len(blockchain.addresses)).To(Equal(1))
