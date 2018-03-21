@@ -54,18 +54,25 @@ build: dep
 	go fmt ./...
 	go build
 
-#Database
-HOST_NAME = localhost
-PORT = 5432
-NAME =
-CONNECT_STRING=postgresql://$(HOST_NAME):$(PORT)/$(NAME)?sslmode=disable
+.PHONY: setup
+setup: checkdbvars
+	curl https://raw.githubusercontent.com/vulcanize/vulcanizedb/master/db/schema.sql > vulcanize_schema.sql
+	createdb $(NAME)
+	psql $(NAME) < vulcanize_schema.sql
 
 # have to copy over crypto related headers https://github.com/ethereum/go-ethereum/issues/2738
 .PHONY: fixlibcrypto
 fixlibcrypto:
 	mkdir tmp-go-ethereum
-	git clone https://github.com/ethereum/go-ethereum/ tmp-go-ethereum
+	git clone https://github.com/ethereum/go-ethereum.git tmp-go-ethereum
 	cp -r "tmp-go-ethereum/crypto/secp256k1/libsecp256k1" "vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/"
+	rm -rf "tmp-go-ethereum"
+
+#Database
+HOST_NAME = localhost
+PORT = 5432
+NAME =
+CONNECT_STRING=postgresql://$(HOST_NAME):$(PORT)/$(NAME)?sslmode=disable
 
 .PHONY: checkdbvars
 checkdbvars:

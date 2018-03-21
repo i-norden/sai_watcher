@@ -15,12 +15,9 @@ before_install:
   - bash install-postgres-10.sh
 
 before_script:
-  - sudo -u postgres createdb vulcanize_private
-  - curl https://raw.githubusercontent.com/vulcanize/vulcanizedb/master/db/schema.sql > vulcanize_schema.sql
-  - sudo -u postgres psql vulcanize_private < vulcanize_schema.sql
+  - make setup NAME=vulcanize_private
   - make migrate HOST_NAME=localhost NAME=vulcanize_private PORT=5432
   - make fixlibcrypto
-  - sudo rm -r tmp-go-ethereum
 
 script:
   - make test

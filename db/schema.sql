@@ -178,7 +178,7 @@ CREATE TABLE blocks (
     parenthash character varying(66),
     size character varying,
     uncle_hash character varying(66),
-    node_id integer NOT NULL,
+    eth_node_id integer NOT NULL,
     is_final boolean,
     miner character varying(42),
     extra_data character varying,
@@ -205,6 +205,80 @@ CREATE SEQUENCE blocks_id_seq
 --
 
 ALTER SEQUENCE blocks_id_seq OWNED BY blocks.id;
+
+
+--
+-- Name: cup; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW cup AS
+ SELECT c.act,
+    c.art,
+    c.block,
+    c.deleted,
+    c.id,
+    c.ink,
+    c.ire,
+    c.lad,
+    c.pip,
+    c.per,
+    ((((c.pip * c.per) * c.ink) / NULLIF(c.art, (0)::numeric)) * (100)::numeric) AS ratio,
+    ((c.pip * c.per) * c.ink) AS tab
+   FROM ( SELECT DISTINCT ON (cup_action.id) cup_action.act,
+            cup_action.art,
+            cup_action.block,
+            cup_action.deleted,
+            cup_action.id,
+            cup_action.ink,
+            cup_action.ire,
+            cup_action.lad,
+            ( SELECT peps_everyblock.pip
+                   FROM maker.peps_everyblock
+                  ORDER BY peps_everyblock.block_number DESC
+                 LIMIT 1) AS pip,
+            ( SELECT peps_everyblock.per
+                   FROM maker.peps_everyblock
+                  ORDER BY peps_everyblock.block_number DESC
+                 LIMIT 1) AS per
+           FROM maker.cup_action
+          ORDER BY cup_action.id DESC, cup_action.block DESC) c;
+
+
+--
+-- Name: cup_act; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW cup_act AS
+ SELECT cup_action.act,
+    cup_action.arg,
+    cup_action.art,
+    cup_action.block,
+    cup_action.deleted,
+    cup_action.id,
+    cup_action.ink,
+    cup_action.ire,
+    cup_action.lad,
+    peps_everyblock.pip,
+    peps_everyblock.per,
+    ((((peps_everyblock.pip * peps_everyblock.per) * cup_action.ink) / NULLIF(cup_action.art, (0)::numeric)) * (100)::numeric) AS ratio,
+    ((peps_everyblock.pip * peps_everyblock.per) * cup_action.ink) AS tab,
+    cup_action.tx
+   FROM (maker.cup_action
+     LEFT JOIN maker.peps_everyblock ON ((peps_everyblock.block_number = cup_action.block)))
+  ORDER BY cup_action.block DESC;
+
+
+--
+-- Name: eth_nodes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE eth_nodes (
+    id integer NOT NULL,
+    genesis_block character varying(66),
+    network_id numeric,
+    eth_node_id character varying(128),
+    client_name character varying
+);
 
 
 --
@@ -268,19 +342,6 @@ ALTER SEQUENCE logs_id_seq OWNED BY logs.id;
 
 
 --
--- Name: nodes; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE nodes (
-    id integer NOT NULL,
-    genesis_block character varying(66),
-    network_id numeric,
-    node_id character varying(128),
-    client_name character varying
-);
-
-
---
 -- Name: nodes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -297,7 +358,7 @@ CREATE SEQUENCE nodes_id_seq
 -- Name: nodes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE nodes_id_seq OWNED BY nodes.id;
+ALTER SEQUENCE nodes_id_seq OWNED BY eth_nodes.id;
 
 
 --
@@ -457,6 +518,13 @@ ALTER TABLE ONLY blocks ALTER COLUMN id SET DEFAULT nextval('blocks_id_seq'::reg
 
 
 --
+-- Name: eth_nodes id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY eth_nodes ALTER COLUMN id SET DEFAULT nextval('nodes_id_seq'::regclass);
+
+
+--
 -- Name: log_filters id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -468,13 +536,6 @@ ALTER TABLE ONLY log_filters ALTER COLUMN id SET DEFAULT nextval('log_filters_id
 --
 
 ALTER TABLE ONLY logs ALTER COLUMN id SET DEFAULT nextval('logs_id_seq'::regclass);
-
-
---
--- Name: nodes id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY nodes ALTER COLUMN id SET DEFAULT nextval('nodes_id_seq'::regclass);
 
 
 --
@@ -515,6 +576,22 @@ ALTER TABLE ONLY watched_contracts
 
 
 --
+-- Name: blocks eth_node_id_block_number_uc; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY blocks
+    ADD CONSTRAINT eth_node_id_block_number_uc UNIQUE (number, eth_node_id);
+
+
+--
+-- Name: eth_nodes eth_node_uc; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY eth_nodes
+    ADD CONSTRAINT eth_node_uc UNIQUE (genesis_block, network_id, eth_node_id);
+
+
+--
 -- Name: logs logs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -531,26 +608,10 @@ ALTER TABLE ONLY log_filters
 
 
 --
--- Name: blocks node_id_block_number_uc; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: eth_nodes nodes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY blocks
-    ADD CONSTRAINT node_id_block_number_uc UNIQUE (number, node_id);
-
-
---
--- Name: nodes node_uc; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY nodes
-    ADD CONSTRAINT node_uc UNIQUE (genesis_block, network_id, node_id);
-
-
---
--- Name: nodes nodes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY nodes
+ALTER TABLE ONLY eth_nodes
     ADD CONSTRAINT nodes_pkey PRIMARY KEY (id);
 
 
@@ -604,7 +665,7 @@ CREATE INDEX block_number_index ON blocks USING btree (number);
 -- Name: node_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX node_id_index ON blocks USING btree (node_id);
+CREATE INDEX node_id_index ON blocks USING btree (eth_node_id);
 
 
 --
@@ -641,7 +702,7 @@ ALTER TABLE ONLY transactions
 --
 
 ALTER TABLE ONLY blocks
-    ADD CONSTRAINT node_fk FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE;
+    ADD CONSTRAINT node_fk FOREIGN KEY (eth_node_id) REFERENCES eth_nodes(id) ON DELETE CASCADE;
 
 
 --
