@@ -83,4 +83,55 @@ var _ = Describe("Cup Actions Repository", func() {
 		Expect(DBblock).To(Equal(block))
 		Expect(DBdeleted).To(BeTrue())
 	})
+
+	It("removes a cup action when corresponding log is removed", func() {
+		err := logRepository.CreateLogs([]core.Log{{}})
+		Expect(err).ToNot(HaveOccurred())
+		var logID int64
+		err = logRepository.Get(&logID, `Select id from logs`)
+		Expect(err).ToNot(HaveOccurred())
+
+		cupAction := cup_actions.CupActionModel{
+			ID:              0,
+			TransactionHash: "",
+			Act:             "open",
+			Arg:             "arg",
+			Lad:             "",
+			Ink:             "1",
+			Art:             "2",
+			Ire:             "3",
+			Block:           0,
+			Deleted:         false,
+		}
+
+		//confirm newly created cup action is present
+		cup_actions_repo := cup_actions.CupActionsRepository{DB: db}
+		err = cup_actions_repo.CreateCupAction(cupAction, logID)
+		Expect(err).ToNot(HaveOccurred())
+		type dbRow struct {
+			LogId int64 `db:"log_id"`
+			cup_actions.CupActionModel
+		}
+		result := &dbRow{}
+		err = cup_actions_repo.DB.QueryRowx(
+			`SELECT * FROM maker.cup_action WHERE log_id = $1`, logID).StructScan(result)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(result.LogId).To(Equal(logID))
+
+		//log is removed b/c of reorg
+		var logCount int64
+		_, err = logRepository.DB.Exec(`DELETE FROM logs WHERE id = $1`, logID)
+		Expect(err).ToNot(HaveOccurred())
+		err = logRepository.Get(&logCount, `SELECT count(*) FROM logs WHERE id = $1`, logID)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(logCount).To(BeZero())
+
+		//confirm corresponding cup action is removed
+		var cupActionCount int
+		err = logRepository.DB.QueryRowx(
+			`SELECT count(*) FROM maker.cup_action WHERE log_id = $1`, logID).Scan(&cupActionCount)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(cupActionCount).To(BeZero())
+
+	})
 })

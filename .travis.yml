@@ -16,7 +16,7 @@ before_install:
 
 before_script:
   - make setup NAME=vulcanize_private
-  - make migrate HOST_NAME=localhost NAME=vulcanize_private PORT=5432
+  - make migrate NAME=vulcanize_private
   - make fixlibcrypto
 
 script:

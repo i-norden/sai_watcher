@@ -689,6 +689,26 @@ CREATE INDEX tx_from_index ON transactions USING btree (tx_from);
 CREATE INDEX tx_to_index ON transactions USING btree (tx_to);
 
 
+SET search_path = maker, pg_catalog;
+
+--
+-- Name: cup_action log_index_fk; Type: FK CONSTRAINT; Schema: maker; Owner: -
+--
+
+ALTER TABLE ONLY cup_action
+    ADD CONSTRAINT log_index_fk FOREIGN KEY (log_id) REFERENCES public.logs(id) ON DELETE CASCADE;
+
+
+--
+-- Name: gov log_index_fk; Type: FK CONSTRAINT; Schema: maker; Owner: -
+--
+
+ALTER TABLE ONLY gov
+    ADD CONSTRAINT log_index_fk FOREIGN KEY (log_id) REFERENCES public.logs(id) ON DELETE CASCADE;
+
+
+SET search_path = public, pg_catalog;
+
 --
 -- Name: transactions blocks_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
 --

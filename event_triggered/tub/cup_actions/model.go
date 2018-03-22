@@ -2,7 +2,7 @@ package cup_actions
 
 type CupActionModel struct {
 	ID              int64
-	TransactionHash string
+	TransactionHash string `db:"tx"`
 	Act             string
 	Arg             string
 	Lad             string

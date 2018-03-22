@@ -1,0 +1,11 @@
+BEGIN;
+ALTER TABLE maker.cup_action
+  ADD CONSTRAINT log_index_fk FOREIGN KEY (log_id)
+REFERENCES logs (id)
+ON DELETE CASCADE;
+
+ALTER TABLE maker.gov
+  ADD CONSTRAINT log_index_fk FOREIGN KEY (log_id)
+REFERENCES logs (id)
+ON DELETE CASCADE;
+COMMIT;

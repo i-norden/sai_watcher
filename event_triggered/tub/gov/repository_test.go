@@ -80,4 +80,56 @@ var _ = Describe("Gov Repository", func() {
 		Expect(result.Axe).To(Equal(axe))
 		Expect(result.Gap).To(Equal(gap))
 	})
+
+	It("removes a gov when corresponding log is removed", func() {
+		err := logRepository.CreateLogs([]core.Log{{}})
+		Expect(err).ToNot(HaveOccurred())
+		var logID int64
+		err = logRepository.Get(&logID, `Select id from logs`)
+		Expect(err).ToNot(HaveOccurred())
+
+		govEvent := &gov.GovModel{
+			Block: 0,
+			Tx:    "TX",
+			Var:   "VAR",
+			Arg:   "1",
+			Guy:   "GUY",
+			Cap:   "2",
+			Mat:   "3",
+			Tax:   "4",
+			Fee:   "5",
+			Axe:   "6",
+			Gap:   "7",
+		}
+
+		//confirm newly created gov is present
+		gov_repo := gov.DataStore{DB: db}
+		err = gov_repo.CreateGov(govEvent, logID)
+		Expect(err).ToNot(HaveOccurred())
+		type dbRow struct {
+			LogId int64 `db:"log_id"`
+			gov.GovModel
+		}
+		result := &dbRow{}
+		err = gov_repo.DB.QueryRowx(
+			`SELECT * FROM maker.gov WHERE log_id = $1`, logID).StructScan(result)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(result.LogId).To(Equal(logID))
+
+		//log is removed b/c of reorg
+		var logCount int64
+		_, err = logRepository.DB.Exec(`DELETE FROM logs WHERE id = $1`, logID)
+		Expect(err).ToNot(HaveOccurred())
+		err = logRepository.Get(&logCount, `SELECT count(*) FROM logs WHERE id = $1`, logID)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(logCount).To(BeZero())
+
+		//confirm corresponding gov is removed
+		var govCount int
+		err = logRepository.DB.QueryRowx(
+			`SELECT count(*) FROM maker.gov WHERE log_id = $1`, logID).Scan(&govCount)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(govCount).To(BeZero())
+
+	})
 })
