@@ -22,7 +22,8 @@ func (ebds DataStore) MissingBlocks(startingBlockNumber int64, highestBlockNumbe
                 SELECT generate_series($1::INT, $2::INT) AS all_block_numbers) series
                 LEFT JOIN maker.peps_everyblock
                     ON block_number = all_block_numbers
-            WHERE block_number ISNULL`,
+            WHERE block_number ISNULL
+            Limit 20`,
 		startingBlockNumber,
 		highestBlockNumber)
 	if err != nil {

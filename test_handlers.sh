@@ -7,5 +7,5 @@ make migrate NAME=vulcanize_public
 make build
 
 ./sai_watcher sync --config environments/public.toml --starting-block-number 4753930 &
-sleep 300
+sleep 30
 ./sai_watcher getEvents --config environments/infura.toml 
