@@ -15,6 +15,7 @@ import (
 var _ = Describe("Peps Repository", func() {
 	var db *postgres.DB
 	var pepsRepository everyblock.DataStore
+	var blockRepository repositories.BlockRepository
 	var logsRepository repositories.LogRepository
 	var filterRepository repositories.FilterRepository
 	var err error
@@ -27,15 +28,19 @@ var _ = Describe("Peps Repository", func() {
 		}, core.Node{})
 		Expect(err).NotTo(HaveOccurred())
 		db.Query(`DELETE FROM maker.peps_everyblock`)
+		db.Query(`DELETE FROM blocks`)
 		db.Query(`DELETE FROM logs`)
 		db.Query(`DELETE FROM log_filters`)
 		pepsRepository = everyblock.DataStore{DB: db}
+		blockRepository = repositories.BlockRepository{DB: db}
 		logsRepository = repositories.LogRepository{DB: db}
 		filterRepository = repositories.FilterRepository{DB: db}
 	})
 
 	Describe("Creating a new pep record", func() {
 		It("inserts new pep peek result with data", func() {
+			err := blockRepository.CreateOrUpdateBlock(core.Block{Number: 10})
+			Expect(err).ToNot(HaveOccurred())
 			wei := big.NewInt(0)
 			wei.SetString("1000000000000000000", 10)
 			ray := big.NewInt(0)
@@ -62,7 +67,56 @@ var _ = Describe("Peps Repository", func() {
 
 			Expect(result.BlockNumber).To(Equal(int64(10)))
 		})
+
+		It("removes pep peek result on block reorg", func() {
+			blockNumber := int64(12345678)
+			block := core.Block{
+				Number:       blockNumber,
+				Transactions: []core.Transaction{{}},
+			}
+			err := blockRepository.CreateOrUpdateBlock(block)
+			Expect(err).ToNot(HaveOccurred())
+			var blockID int64
+			err = blockRepository.Get(&blockID, `Select id from blocks`)
+			Expect(err).NotTo(HaveOccurred())
+
+			// confirm newly created Pep is present with existing block ID
+			err = pepsRepository.Create(blockNumber, everyblock.Peek{}, everyblock.Peek{}, everyblock.Per{})
+			Expect(err).NotTo(HaveOccurred())
+			result := &everyblock.Row{}
+			err = pepsRepository.DB.QueryRowx(
+				`SELECT * FROM maker.peps_everyblock WHERE block_id = $1`, blockID).StructScan(result)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(result.BlockID).To(Equal(blockID))
+
+			// block is removed because of reorg
+			_, err = blockRepository.DB.Exec(`DELETE FROM blocks WHERE id = $1`, blockID)
+			Expect(err).ToNot(HaveOccurred())
+			var blockCount int
+			err = blockRepository.Get(&blockCount, `SELECT count(*) FROM logs WHERE id = $1`, blockID)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(blockCount).To(BeZero())
+
+			// confirm corresponding pep is removed
+			var pepCount int
+			err = pepsRepository.DB.QueryRowx(
+				`SELECT count(*) FROM maker.peps_everyblock WHERE block_id = $1`, blockID).Scan(&pepCount)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(pepCount).To(BeZero())
+		})
+
 		It("returns values that do not have a record within a block range", func() {
+			err := blockRepository.CreateOrUpdateBlock(core.Block{Number: 0})
+			Expect(err).ToNot(HaveOccurred())
+			err = blockRepository.CreateOrUpdateBlock(core.Block{Number: 1})
+			Expect(err).ToNot(HaveOccurred())
+			err = blockRepository.CreateOrUpdateBlock(core.Block{Number: 2})
+			Expect(err).ToNot(HaveOccurred())
+			err = blockRepository.CreateOrUpdateBlock(core.Block{Number: 3})
+			Expect(err).ToNot(HaveOccurred())
+			err = blockRepository.CreateOrUpdateBlock(core.Block{Number: 4})
+			Expect(err).ToNot(HaveOccurred())
+
 			pip := everyblock.Peek{}
 			pep := everyblock.Peek{}
 			per := everyblock.Per{}

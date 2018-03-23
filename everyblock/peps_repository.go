@@ -33,10 +33,15 @@ func (ebds DataStore) MissingBlocks(startingBlockNumber int64, highestBlockNumbe
 }
 
 func (ebds DataStore) Create(blockNumber int64, pep Peek, pip Peek, per Per) error {
-	_, err := ebds.Exec(
-		`INSERT INTO maker.peps_everyblock (block_number, pep, pip, per) 
-                VALUES($1, $2::NUMERIC, $3::NUMERIC, $4::NUMERIC)`,
-		blockNumber, pep.Wad(), pip.Wad(), per.Ray())
+	var blockID int
+	err := ebds.DB.Get(&blockID, `SELECT ID from blocks where number = $1`, blockNumber)
+	if err != nil {
+		return err
+	}
+	_, err = ebds.Exec(
+		`INSERT INTO maker.peps_everyblock (block_number, pep, pip, per, block_id) 
+                VALUES($1, $2::NUMERIC, $3::NUMERIC, $4::NUMERIC, $5::NUMERIC)`,
+		blockNumber, pep.Wad(), pip.Wad(), per.Ray(), blockID)
 	if err != nil {
 		return err
 	}

@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 10.1
--- Dumped by pg_dump version 10.1
+-- Dumped from database version 10.2
+-- Dumped by pg_dump version 10.2
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -105,6 +105,7 @@ CREATE TABLE gov (
 CREATE TABLE peps_everyblock (
     id integer NOT NULL,
     block_number integer NOT NULL,
+    block_id integer NOT NULL,
     pep numeric,
     pip numeric,
     per numeric
@@ -690,6 +691,14 @@ CREATE INDEX tx_to_index ON transactions USING btree (tx_to);
 
 
 SET search_path = maker, pg_catalog;
+
+--
+-- Name: peps_everyblock blocks_fk; Type: FK CONSTRAINT; Schema: maker; Owner: -
+--
+
+ALTER TABLE ONLY peps_everyblock
+    ADD CONSTRAINT blocks_fk FOREIGN KEY (block_id) REFERENCES public.blocks(id) ON DELETE CASCADE;
+
 
 --
 -- Name: cup_action log_index_fk; Type: FK CONSTRAINT; Schema: maker; Owner: -

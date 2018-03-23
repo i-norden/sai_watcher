@@ -6,4 +6,5 @@ type Row struct {
 	Pip         string
 	Per         string
 	BlockNumber int64 `db:"block_number"`
+	BlockID     int64 `db:"block_id"`
 }
