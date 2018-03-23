@@ -85,7 +85,7 @@ func NewCupModifiedTransformer(db *postgres.DB, blockchain core.Blockchain) shar
 	car := cup_actions.CupActionsRepository{DB: db}
 	fr := repositories.FilterRepository{DB: db}
 	wer := repositories.WatchedEventRepository{DB: db}
-	fetcher := cup_actions.CupFetcher{blockchain}
+	fetcher := cup_actions.CupFetcher{Blockchain: blockchain}
 	for _, filter := range CupModifiedFilters {
 		fr.CreateFilter(filter)
 	}

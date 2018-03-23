@@ -13,7 +13,7 @@ var _ = Describe("Gov Fetcher", func() {
 
 	It("fetches axe", func() {
 		mockBlockchain := test_helpers.MockBlockchain{}
-		fetcher := gov.GovFetcher{&mockBlockchain}
+		fetcher := gov.GovFetcher{Blockchain: &mockBlockchain}
 		blockNumber := int64(12345)
 
 		result, err := fetcher.FetchAxe(blockNumber)
@@ -24,7 +24,7 @@ var _ = Describe("Gov Fetcher", func() {
 
 	It("fetches cap", func() {
 		mockBlockchain := test_helpers.MockBlockchain{}
-		fetcher := gov.GovFetcher{&mockBlockchain}
+		fetcher := gov.GovFetcher{Blockchain: &mockBlockchain}
 		blockNumber := int64(12345)
 
 		result, err := fetcher.FetchCap(blockNumber)
@@ -35,7 +35,7 @@ var _ = Describe("Gov Fetcher", func() {
 
 	It("fetches mat", func() {
 		mockBlockchain := test_helpers.MockBlockchain{}
-		fetcher := gov.GovFetcher{&mockBlockchain}
+		fetcher := gov.GovFetcher{Blockchain: &mockBlockchain}
 		blockNumber := int64(12345)
 
 		result, err := fetcher.FetchMat(blockNumber)
@@ -46,7 +46,7 @@ var _ = Describe("Gov Fetcher", func() {
 
 	It("fetches tax", func() {
 		mockBlockchain := test_helpers.MockBlockchain{}
-		fetcher := gov.GovFetcher{&mockBlockchain}
+		fetcher := gov.GovFetcher{Blockchain: &mockBlockchain}
 		blockNumber := int64(12345)
 
 		result, err := fetcher.FetchTax(blockNumber)
@@ -57,7 +57,7 @@ var _ = Describe("Gov Fetcher", func() {
 
 	It("fetches fee", func() {
 		mockBlockchain := test_helpers.MockBlockchain{}
-		fetcher := gov.GovFetcher{&mockBlockchain}
+		fetcher := gov.GovFetcher{Blockchain: &mockBlockchain}
 		blockNumber := int64(12345)
 
 		result, err := fetcher.FetchFee(blockNumber)
@@ -68,7 +68,7 @@ var _ = Describe("Gov Fetcher", func() {
 
 	It("fetches gap", func() {
 		mockBlockchain := test_helpers.MockBlockchain{}
-		fetcher := gov.GovFetcher{&mockBlockchain}
+		fetcher := gov.GovFetcher{Blockchain: &mockBlockchain}
 		blockNumber := int64(12345)
 
 		result, err := fetcher.FetchGap(blockNumber)

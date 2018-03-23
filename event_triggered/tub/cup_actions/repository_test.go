@@ -68,7 +68,7 @@ var _ = Describe("Cup Actions Repository", func() {
 		var DBire string
 		var DBblock int64
 		var DBdeleted bool
-		err = cup_actions.CupActionsRepository{db}.DB.QueryRowx(
+		err = cup_actions.CupActionsRepository{DB: db}.DB.QueryRowx(
 			`SELECT id, tx, act, arg, lad, ink, art, ire, block, deleted FROM maker.cup_action`).
 			Scan(&DBid, &DBtransactionHash, &DBact, &DBarg, &DBlad, &DBink, &DBart, &DBire, &DBblock, &DBdeleted)
 		Expect(err).ToNot(HaveOccurred())

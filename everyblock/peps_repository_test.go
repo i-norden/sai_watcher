@@ -16,8 +16,6 @@ var _ = Describe("Peps Repository", func() {
 	var db *postgres.DB
 	var pepsRepository everyblock.DataStore
 	var blockRepository repositories.BlockRepository
-	var logsRepository repositories.LogRepository
-	var filterRepository repositories.FilterRepository
 	var err error
 
 	BeforeEach(func() {
@@ -33,8 +31,6 @@ var _ = Describe("Peps Repository", func() {
 		db.Query(`DELETE FROM log_filters`)
 		pepsRepository = everyblock.DataStore{DB: db}
 		blockRepository = repositories.BlockRepository{DB: db}
-		logsRepository = repositories.LogRepository{DB: db}
-		filterRepository = repositories.FilterRepository{DB: db}
 	})
 
 	Describe("Creating a new pep record", func() {

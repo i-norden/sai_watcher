@@ -27,10 +27,10 @@ var _ = Describe("Gov transformer", func() {
 			ReturnEvents: watchedEvents,
 		}
 		transformer := gov.GovTransformer{
-			&test_helpers.MockBlockchain{},
-			&mockWatchedEventsRepo,
-			&test_helpers.MockGovFetcher{},
-			&test_helpers.MockGovRepository{},
+			Blockchain:             &test_helpers.MockBlockchain{},
+			WatchedEventRepository: &mockWatchedEventsRepo,
+			Fetcher:                &test_helpers.MockGovFetcher{},
+			GovRepository:          &test_helpers.MockGovRepository{},
 		}
 
 		transformer.Execute()

@@ -11,7 +11,7 @@ import (
 var _ = Describe("Fetcher", func() {
 	It("fetches contract data", func() {
 		mockBlockchain := test_helpers.MockBlockchain{}
-		fetcher := cup_actions.CupFetcher{&mockBlockchain}
+		fetcher := cup_actions.CupFetcher{Blockchain: &mockBlockchain}
 		methodArg := "methodArg"
 		blockNumber := int64(12345)
 
