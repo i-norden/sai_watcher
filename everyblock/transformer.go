@@ -16,8 +16,8 @@ type Transformer struct {
 
 var PepsFilter = filters.LogFilter{
 	Name:      "PepsLogger",
-	FromBlock: 5254474,
-	ToBlock:   5261125,
+	FromBlock: 4742900,
+	ToBlock:   -1,
 	Address:   "0x99041f808d598b782d5a3e498681c2452a31da08",
 	Topics:    core.Topics{"0x296ba4ca62c6c21c95e828080cb8aec7481b71390585605300a8a76f9e95b527"},
 }
@@ -40,6 +40,9 @@ func (pepTransformer *Transformer) Execute() error {
 		blockUpperBound = PepsFilter.ToBlock
 	}
 	blocks, err := pepTransformer.MissingBlocks(PepsFilter.FromBlock, blockUpperBound)
+	if len(blocks) == 0 {
+		return nil
+	}
 	if err != nil {
 		log.Println("error fetching missing blocks: ", err)
 	}

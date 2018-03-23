@@ -74,7 +74,8 @@ CREATE TABLE cup_action (
     art numeric DEFAULT 0 NOT NULL,
     ire numeric DEFAULT 0 NOT NULL,
     block integer NOT NULL,
-    deleted boolean DEFAULT false
+    deleted boolean DEFAULT false,
+    guy character varying(66)
 );
 
 
@@ -104,8 +105,9 @@ CREATE TABLE gov (
 
 CREATE TABLE peps_everyblock (
     id integer NOT NULL,
-    block_number integer NOT NULL,
+    block_number bigint NOT NULL,
     block_id integer NOT NULL,
+    block_time bigint,
     pep numeric,
     pip numeric,
     per numeric
@@ -224,10 +226,12 @@ CREATE VIEW cup AS
     c.pip,
     c.per,
     ((((c.pip * c.per) * c.ink) / NULLIF(c.art, (0)::numeric)) * (100)::numeric) AS ratio,
-    ((c.pip * c.per) * c.ink) AS tab
+    ((c.pip * c.per) * c.ink) AS tab,
+    c."time"
    FROM ( SELECT DISTINCT ON (cup_action.id) cup_action.act,
             cup_action.art,
             cup_action.block,
+            blocks."time",
             cup_action.deleted,
             cup_action.id,
             cup_action.ink,
@@ -241,7 +245,8 @@ CREATE VIEW cup AS
                    FROM maker.peps_everyblock
                   ORDER BY peps_everyblock.block_number DESC
                  LIMIT 1) AS per
-           FROM maker.cup_action
+           FROM (maker.cup_action
+             JOIN blocks ON ((cup_action.block = blocks.number)))
           ORDER BY cup_action.id DESC, cup_action.block DESC) c;
 
 

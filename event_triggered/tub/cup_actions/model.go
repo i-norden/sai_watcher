@@ -11,4 +11,5 @@ type CupActionModel struct {
 	Ire             string
 	Block           int64
 	Deleted         bool
+	Guy             string
 }

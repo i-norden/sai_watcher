@@ -35,7 +35,7 @@ var _ = Describe("Peps Repository", func() {
 
 	Describe("Creating a new pep record", func() {
 		It("inserts new pep peek result with data", func() {
-			err := blockRepository.CreateOrUpdateBlock(core.Block{Number: 10})
+			err := blockRepository.CreateOrUpdateBlock(core.Block{Number: 10, Time: int64(100)})
 			Expect(err).ToNot(HaveOccurred())
 			wei := big.NewInt(0)
 			wei.SetString("1000000000000000000", 10)
@@ -62,6 +62,7 @@ var _ = Describe("Peps Repository", func() {
 			Expect(result.Per).To(Equal("10"))
 
 			Expect(result.BlockNumber).To(Equal(int64(10)))
+			Expect(result.BlockTime).To(Equal(int64(100)))
 		})
 
 		It("removes pep peek result on block reorg", func() {
@@ -101,17 +102,11 @@ var _ = Describe("Peps Repository", func() {
 			Expect(pepCount).To(BeZero())
 		})
 
-		It("returns values that do not have a record within a block range", func() {
-			err := blockRepository.CreateOrUpdateBlock(core.Block{Number: 0})
-			Expect(err).ToNot(HaveOccurred())
-			err = blockRepository.CreateOrUpdateBlock(core.Block{Number: 1})
-			Expect(err).ToNot(HaveOccurred())
-			err = blockRepository.CreateOrUpdateBlock(core.Block{Number: 2})
-			Expect(err).ToNot(HaveOccurred())
-			err = blockRepository.CreateOrUpdateBlock(core.Block{Number: 3})
-			Expect(err).ToNot(HaveOccurred())
-			err = blockRepository.CreateOrUpdateBlock(core.Block{Number: 4})
-			Expect(err).ToNot(HaveOccurred())
+		It("returns values that do not have a record AND are in vulcanize db within a block range", func() {
+			for i := 0; i < 11; i++ {
+				err = blockRepository.CreateOrUpdateBlock(core.Block{Number: int64(i)})
+				Expect(err).ToNot(HaveOccurred())
+			}
 
 			pip := everyblock.Peek{}
 			pep := everyblock.Peek{}

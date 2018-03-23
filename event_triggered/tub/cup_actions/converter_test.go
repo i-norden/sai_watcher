@@ -3,6 +3,8 @@ package cup_actions_test
 import (
 	"math/big"
 
+	"strings"
+
 	"github.com/8thlight/sai_watcher/event_triggered/tub/cup_actions"
 	"github.com/ethereum/go-ethereum/common"
 	. "github.com/onsi/ginkgo"
@@ -31,7 +33,7 @@ var _ = Describe("Cup Data Converter", func() {
 		Expect(model.TransactionHash).To(Equal(cupAction.TransactionHash))
 		Expect(model.Act).To(Equal(cupAction.Act))
 		Expect(model.Arg).To(Equal("1"))
-		Expect(model.Lad).To(Equal(common.HexToAddress(cupAction.Lad).Hex()))
+		Expect(model.Lad).To(Equal(strings.ToLower(common.HexToAddress(cupAction.Lad).Hex())))
 		Expect(model.Ink).To(Equal("123"))
 		Expect(model.Art).To(Equal("456"))
 		Expect(model.Ire).To(Equal("789"))
@@ -59,7 +61,7 @@ var _ = Describe("Cup Data Converter", func() {
 		Expect(model.TransactionHash).To(Equal(cupAction.TransactionHash))
 		Expect(model.Act).To(Equal(cupAction.Act))
 		Expect(model.Arg).To(Equal(cupAction.Arg))
-		Expect(model.Lad).To(Equal(common.HexToAddress(cupAction.Lad).Hex()))
+		Expect(model.Lad).To(Equal(strings.ToLower(common.HexToAddress(cupAction.Lad).Hex())))
 		Expect(model.Ink).To(Equal("123"))
 		Expect(model.Art).To(Equal("456"))
 		Expect(model.Ire).To(Equal("789"))

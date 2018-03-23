@@ -31,14 +31,16 @@ CREATE VIEW public.cup AS
     pip,
     per,
     (pip * per * ink) / NULLIF(art, 0) * 100 AS ratio,
-    (pip * per * ink)                        AS tab
+    (pip * per * ink)                        AS tab,
+    time
   FROM (
          SELECT DISTINCT ON (cup_action.id)
            act,
            art,
            block,
+           time,
            deleted,
-           id,
+           cup_action.id,
            ink,
            ire,
            lad,
@@ -51,6 +53,7 @@ CREATE VIEW public.cup AS
             ORDER BY block_number DESC
             LIMIT 1) AS per
          FROM maker.cup_action
+              JOIN blocks ON block = blocks.number
          ORDER BY maker.cup_action.id DESC, maker.cup_action.block DESC
        )
        c;

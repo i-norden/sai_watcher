@@ -41,6 +41,7 @@ var _ = Describe("Cup Actions Repository", func() {
 		ink := "123"
 		art := "456"
 		ire := "789"
+		guy := "Guy"
 		block := int64(54321)
 		cupAction := cup_actions.CupActionModel{
 			ID:              id,
@@ -51,6 +52,7 @@ var _ = Describe("Cup Actions Repository", func() {
 			Ink:             ink,
 			Art:             art,
 			Ire:             ire,
+			Guy:             guy,
 			Block:           block,
 			Deleted:         true,
 		}

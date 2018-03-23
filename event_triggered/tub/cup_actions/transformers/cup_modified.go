@@ -128,6 +128,7 @@ func createCupAction(cmh CupModifiedTransformer, watchedEvent *core.WatchedEvent
 		Ire:             cup.Ire.String(),
 		Block:           watchedEvent.BlockNumber,
 		Deleted:         isShut(watchedEvent.Topic0),
+		Guy:             common.HexToAddress(watchedEvent.Topic1).Hex(),
 	}
 	model := cup_actions.ConvertToModel(entity)
 	cmh.CupActionsRepository.CreateCupAction(model, watchedEvent.LogID)

@@ -15,15 +15,17 @@ type Repository interface {
 }
 
 func (ebds DataStore) MissingBlocks(startingBlockNumber int64, highestBlockNumber int64) ([]int64, error) {
+	// blocks that exist in vulcanize but no pep for
 	numbers := make([]int64, 0)
 	err := ebds.DB.Select(&numbers,
-		`SELECT all_block_numbers
-            FROM (
-                SELECT generate_series($1::INT, $2::INT) AS all_block_numbers) series
-                LEFT JOIN maker.peps_everyblock
-                    ON block_number = all_block_numbers
-            WHERE block_number ISNULL
-            Limit 20`,
+		`SELECT number
+                    FROM blocks
+                      LEFT JOIN maker.peps_everyblock
+                        ON blocks.number = block_number
+                    WHERE block_number ISNULL
+                    AND number > $1
+                    AND number <= $2
+                LIMIT 20;`,
 		startingBlockNumber,
 		highestBlockNumber)
 	if err != nil {
@@ -32,16 +34,21 @@ func (ebds DataStore) MissingBlocks(startingBlockNumber int64, highestBlockNumbe
 	return numbers, err
 }
 
+type blockMetaData struct {
+	BlockID   int   `db:"id"`
+	BlockTime int64 `db:"time"`
+}
+
 func (ebds DataStore) Create(blockNumber int64, pep Peek, pip Peek, per Per) error {
-	var blockID int
-	err := ebds.DB.Get(&blockID, `SELECT ID from blocks where number = $1`, blockNumber)
+	bmd := blockMetaData{}
+	err := ebds.DB.Get(&bmd, `SELECT id, time FROM blocks WHERE number = $1`, blockNumber)
 	if err != nil {
 		return err
 	}
 	_, err = ebds.Exec(
-		`INSERT INTO maker.peps_everyblock (block_number, pep, pip, per, block_id) 
-                VALUES($1, $2::NUMERIC, $3::NUMERIC, $4::NUMERIC, $5::NUMERIC)`,
-		blockNumber, pep.Wad(), pip.Wad(), per.Ray(), blockID)
+		`INSERT INTO maker.peps_everyblock (block_number, pep, pip, per, block_id, block_time) 
+                VALUES($1, $2::NUMERIC, $3::NUMERIC, $4::NUMERIC, $5::NUMERIC, $6)`,
+		blockNumber, pep.Wad(), pip.Wad(), per.Ray(), bmd.BlockID, bmd.BlockTime)
 	if err != nil {
 		return err
 	}
@@ -51,7 +58,7 @@ func (ebds DataStore) Create(blockNumber int64, pep Peek, pip Peek, per Per) err
 func (ebds DataStore) Get(blockNumber int64) (*Row, error) {
 	result := &Row{}
 	err := ebds.DB.Get(result,
-		`SELECT id, block_number, pep, pip, per 
+		`SELECT id, block_number, block_time, pep, pip, per 
                 FROM maker.peps_everyblock WHERE block_number = $1`, blockNumber)
 	if err != nil {
 		return &Row{}, err

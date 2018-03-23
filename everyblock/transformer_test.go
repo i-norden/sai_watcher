@@ -73,7 +73,7 @@ var _ bool = Describe("pep updater", func() {
 			Port:     5432,
 		}, core.Node{})
 		Expect(err).NotTo(HaveOccurred())
-		db.Query(`DELETE FROM peps_everyblock`)
+		db.Query(`DELETE FROM maker.peps_everyblock`)
 		db.Query(`DELETE FROM log_filters`)
 
 	})

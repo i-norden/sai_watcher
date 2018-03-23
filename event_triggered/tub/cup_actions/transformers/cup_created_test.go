@@ -1,6 +1,8 @@
 package transformers_test
 
 import (
+	"strings"
+
 	"github.com/8thlight/sai_watcher/event_triggered/tub/cup_actions/transformers"
 	"github.com/8thlight/sai_watcher/test_helpers"
 	"github.com/ethereum/go-ethereum/common"
@@ -68,7 +70,8 @@ var _ = Describe("Cup Created Transformer", func() {
 		Expect(createdCup.ID).To(Equal(shared.HexToInt64(cupIndexHex)))
 		Expect(createdCup.Ink).To(Equal("0"))
 		Expect(createdCup.Ire).To(Equal("0"))
-		Expect(createdCup.Lad).To(Equal(common.HexToAddress(cupLadHex).Hex()))
+		Expect(createdCup.Lad).To(Equal(strings.ToLower(common.HexToAddress(cupLadHex).Hex())))
+		Expect(createdCup.Guy).To(Equal(strings.ToLower(common.HexToAddress(cupLadHex).Hex())))
 		Expect(createdCup.TransactionHash).To(Equal(transactionHash))
 		Expect(len(mockCupActionsRepo.LogIDs)).To(Equal(1))
 		Expect(mockCupActionsRepo.LogIDs[0]).To(Equal(logID))

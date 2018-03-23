@@ -3,6 +3,8 @@ package transformers
 import (
 	"log"
 
+	"strings"
+
 	"github.com/8thlight/sai_watcher/event_triggered/tub/cup_actions"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/vulcanize/vulcanizedb/libraries/shared"
@@ -53,12 +55,13 @@ func (cch CupCreatedTransformer) Execute() error {
 			TransactionHash: watchedEvent.TxHash,
 			Act:             "open",
 			Arg:             "",
-			Lad:             common.HexToAddress(watchedEvent.Topic1).Hex(),
+			Lad:             strings.ToLower(common.HexToAddress(watchedEvent.Topic1).Hex()),
 			Ink:             "0",
 			Art:             "0",
 			Ire:             "0",
 			Block:           watchedEvent.BlockNumber,
 			Deleted:         false,
+			Guy:             strings.ToLower(common.HexToAddress(watchedEvent.Topic1).Hex()),
 		}
 		cch.CupActionsRepository.CreateCupAction(model, watchedEvent.LogID)
 	}
