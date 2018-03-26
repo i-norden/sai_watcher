@@ -16,16 +16,24 @@ make build
 
 `./sai_watcher getEvents --config environments/public.toml`
 
-## Graphql schema
-Compatible with `postgraphile`:
-    - `npm install -g postgraphile`
-    - `postgraphile -c "postgresql://user@localhost:5432/vulcanize_public" --schema=public,maker`
+## Graphql
+Compatible with `postgraphile`:    
+    
+```
+npm install -g postgraphile
+postgraphile -c "postgresql://user@localhost:5432/vulcanize_public" --schema=public,maker
+```
 
 Example schema / server in `go` in `graphql_server/schema.go`:
-    - `./sai_watcher graphql --config environments/public.toml` 
+    
+```
+./sai_watcher graphql --config environments/public.toml
+```
 
 ## Run tests
-`make setup NAME=vulcanize_private`
-`make migrate NAME=vulcanize_private`
-`ginkgo -r`
+```
+make setup NAME=vulcanize_private
+make migrate NAME=vulcanize_private
+ginkgo -r
+```
 
