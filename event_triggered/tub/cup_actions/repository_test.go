@@ -86,6 +86,53 @@ var _ = Describe("Cup Actions Repository", func() {
 		Expect(DBdeleted).To(BeTrue())
 	})
 
+	It("does not allow more than one cup action per transaction", func() {
+		err := logRepository.CreateLogs([]core.Log{{}})
+		Expect(err).ToNot(HaveOccurred())
+		var logIDOne int64
+		err = logRepository.Get(&logIDOne, `Select id from logs`)
+
+		err = logRepository.CreateLogs([]core.Log{{}})
+		Expect(err).ToNot(HaveOccurred())
+		var logIDTwo int64
+		err = logRepository.Get(&logIDTwo, `Select id from logs where id != $1`, logIDOne)
+		Expect(err).ToNot(HaveOccurred())
+
+		id := int64(12345)
+		tx := "Transaction"
+		act := "open"
+		arg := "Arg"
+		lad := "Lad"
+		ink := "123"
+		art := "456"
+		ire := "789"
+		guy := "Guy"
+		block := int64(54321)
+		cupAction := cup_actions.CupActionModel{
+			ID:              id,
+			TransactionHash: tx,
+			Act:             act,
+			Arg:             arg,
+			Lad:             lad,
+			Ink:             ink,
+			Art:             art,
+			Ire:             ire,
+			Guy:             guy,
+			Block:           block,
+			Deleted:         true,
+		}
+
+		cup_actions_repo := cup_actions.CupActionsRepository{DB: db}
+		err = cup_actions_repo.CreateCupAction(cupAction, logIDOne)
+		Expect(err).ToNot(HaveOccurred())
+		err = cup_actions_repo.CreateCupAction(cupAction, logIDTwo)
+		Expect(err).ToNot(HaveOccurred())
+
+		var cupCount int
+		cup_actions_repo.DB.Get(&cupCount, `Select count(*) from maker.cup_action`)
+		Expect(cupCount).To(Equal(1))
+	})
+
 	It("removes a cup action when corresponding log is removed", func() {
 		err := logRepository.CreateLogs([]core.Log{{}})
 		Expect(err).ToNot(HaveOccurred())
