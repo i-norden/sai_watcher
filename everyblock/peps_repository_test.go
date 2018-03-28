@@ -55,7 +55,6 @@ var _ = Describe("Peps Repository", func() {
 			Expect(err).ToNot(HaveOccurred())
 			result, err := pepsRepository.Get(int64(10))
 			Expect(err).ToNot(HaveOccurred())
-			Expect(result.ID).ToNot(BeNil())
 			Expect(result.Pep).To(Equal(big.NewRat(1, 1e18).FloatString(18)))
 			Expect(result.Pip).To(Equal(big.NewRat(2, 1e18).FloatString(18)))
 			Expect(result.Per).To(Equal("10"))
@@ -80,9 +79,14 @@ var _ = Describe("Peps Repository", func() {
 			// confirm newly created Pep is present with existing block ID
 			err = pepsRepository.Create(blockNumber, everyblock.Peek{}, everyblock.Peek{}, everyblock.Per{})
 			Expect(err).NotTo(HaveOccurred())
-			result := &everyblock.Row{}
+			type testRow struct {
+				ID      int
+				BlockID int64 `db:"block_id"`
+				*everyblock.Row
+			}
+			var result testRow
 			err = pepsRepository.DB.QueryRowx(
-				`SELECT * FROM maker.peps_everyblock WHERE block_id = $1`, blockID).StructScan(result)
+				`SELECT * FROM maker.peps_everyblock WHERE block_id = $1`, blockID).StructScan(&result)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(result.BlockID).To(Equal(blockID))
 

@@ -19,7 +19,6 @@ var Schema = `
 	}
 	
 	type Row {
-		id: Int!	
 		blockNumber: Int!
 		per: String!
 		pep: String!
@@ -72,10 +71,6 @@ func resolveRows(rows []*everyblock.Row) []*rowResolver {
 
 type rowResolver struct {
 	r *everyblock.Row
-}
-
-func (rr rowResolver) Id() int32 {
-	return int32(rr.r.ID)
 }
 
 func (rr rowResolver) BlockNumber() int32 {

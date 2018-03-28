@@ -59,7 +59,7 @@ func (ebds DataStore) Create(blockNumber int64, pep Peek, pip Peek, per Per) err
 func (ebds DataStore) Get(blockNumber int64) (*Row, error) {
 	result := &Row{}
 	err := ebds.DB.Get(result,
-		`SELECT id, block_number, block_time, pep, pip, per 
+		`SELECT block_number, block_time, pep, pip, per 
                 FROM maker.peps_everyblock WHERE block_number = $1`, blockNumber)
 	if err != nil {
 		return &Row{}, err
@@ -69,7 +69,7 @@ func (ebds DataStore) Get(blockNumber int64) (*Row, error) {
 
 func (ebds DataStore) GetAllRows() ([]Row, error) {
 	var results []Row
-	err := ebds.DB.Select(&results, `SELECT id, block_number, block_id, block_time, pep, pip, per from maker.peps_everyblock`)
+	err := ebds.DB.Select(&results, `SELECT block_number, block_time, pep, pip, per from maker.peps_everyblock`)
 	if err != nil {
 		return results, err
 	}
