@@ -2,6 +2,8 @@ BIN = $(GOPATH)/bin
 BASE = $(GOPATH)/src/$(PACKAGE)
 PKGS = go list ./... | grep -v "^vendor/"
 
+default: build
+
 #Tools
 DEP = $(BIN)/dep
 $(BIN)/dep:
@@ -50,7 +52,7 @@ test: | $(GINKGO) $(LINT)
 dep: | $(DEP)
 	$(DEP) ensure
 
-build: dep
+build: dep fixlibcrypto
 	go fmt ./...
 	go build
 
