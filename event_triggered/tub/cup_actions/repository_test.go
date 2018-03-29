@@ -94,33 +94,25 @@ var _ = Describe("Cup Actions Repository", func() {
 			Expect(DBdeleted).To(BeTrue())
 		})
 
-		It("does not allow more than one cup action per transaction", func() {
-			err := logRepository.CreateLogs([]core.Log{{}})
+		It("does not allow more than one cup action (with same act, arg) per transaction", func() {
+			err := logRepository.CreateLogs([]core.Log{{}, {}, {}})
 			Expect(err).ToNot(HaveOccurred())
-			var logIDOne int64
-			err = logRepository.Get(&logIDOne, `Select id from logs`)
-
-			err = logRepository.CreateLogs([]core.Log{{}})
-			Expect(err).ToNot(HaveOccurred())
-			var logIDTwo int64
-			err = logRepository.Get(&logIDTwo, `Select id from logs where id != $1`, logIDOne)
-			Expect(err).ToNot(HaveOccurred())
+			var logIDs []int64
+			err = logRepository.Select(&logIDs, `Select id from logs`)
 
 			id := int64(12345)
 			tx := "Transaction"
-			act := "open"
-			arg := "Arg"
 			lad := "Lad"
 			ink := "123"
 			art := "456"
 			ire := "789"
 			guy := "Guy"
 			block := int64(54321)
-			cupAction := models.CupAction{
+			cupActionUniqueOne := models.CupAction{
 				ID:              id,
 				TransactionHash: tx,
-				Act:             act,
-				Arg:             arg,
+				Act:             "open",
+				Arg:             "arg1",
 				Lad:             lad,
 				Ink:             ink,
 				Art:             art,
@@ -129,16 +121,32 @@ var _ = Describe("Cup Actions Repository", func() {
 				Block:           block,
 				Deleted:         true,
 			}
+			cupActionUniqueTwo := models.CupAction{
+				ID:              id,
+				TransactionHash: tx,
+				Act:             "open",
+				Arg:             "arg2",
+				Lad:             lad,
+				Ink:             ink,
+				Art:             art,
+				Ire:             ire,
+				Guy:             guy,
+				Block:           block,
+				Deleted:         true,
+			}
+			cupActionDuplicate := cupActionUniqueOne
 
 			cup_actions_repo := cup_actions.CupActionsRepository{DB: db}
-			err = cup_actions_repo.CreateCupAction(cupAction, logIDOne)
+			err = cup_actions_repo.CreateCupAction(cupActionUniqueOne, logIDs[0])
 			Expect(err).ToNot(HaveOccurred())
-			err = cup_actions_repo.CreateCupAction(cupAction, logIDTwo)
+			err = cup_actions_repo.CreateCupAction(cupActionUniqueTwo, logIDs[1])
+			Expect(err).ToNot(HaveOccurred())
+			err = cup_actions_repo.CreateCupAction(cupActionDuplicate, logIDs[2])
 			Expect(err).ToNot(HaveOccurred())
 
 			var cupCount int
 			cup_actions_repo.DB.Get(&cupCount, `Select count(*) from maker.cup_action`)
-			Expect(cupCount).To(Equal(1))
+			Expect(cupCount).To(Equal(2))
 		})
 	})
 

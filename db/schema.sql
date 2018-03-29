@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 10.2
--- Dumped by pg_dump version 10.2
+-- Dumped from database version 10.1
+-- Dumped by pg_dump version 10.1
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -564,6 +564,18 @@ ALTER TABLE ONLY transactions ALTER COLUMN id SET DEFAULT nextval('transactions_
 
 ALTER TABLE ONLY watched_contracts ALTER COLUMN contract_id SET DEFAULT nextval('watched_contracts_contract_id_seq'::regclass);
 
+
+SET search_path = maker, pg_catalog;
+
+--
+-- Name: cup_action tx_act_arg_constraint; Type: CONSTRAINT; Schema: maker; Owner: -
+--
+
+ALTER TABLE ONLY cup_action
+    ADD CONSTRAINT tx_act_arg_constraint UNIQUE (tx, act, arg);
+
+
+SET search_path = public, pg_catalog;
 
 --
 -- Name: blocks blocks_pkey; Type: CONSTRAINT; Schema: public; Owner: -

@@ -23,5 +23,6 @@ CREATE TABLE maker.cup_action (
   ire     NUMERIC DEFAULT 0     NOT NULL,
   block   INTEGER               NOT NULL,
   deleted BOOLEAN DEFAULT FALSE,
-  guy     CHARACTER VARYING(66)
+  guy     CHARACTER VARYING(66),
+  CONSTRAINT tx_act_arg_constraint UNIQUE (tx, act, arg)
 );

@@ -73,13 +73,13 @@ func generateReport() {
 	defer file.Close()
 	written := ioutil.WriteFile(filename, marshalled, 0644)
 	if written != nil {
-		fmt.Println(written)
+		log.Fatal(written)
 	}
 
 	ipfsCommand := exec.Command("ipfs", "dag", "put", filename)
 	output, err := ipfsCommand.Output()
 	if err != nil {
-		fmt.Println("Unable to write to IPFS", err)
+		log.Fatal("Unable to write to IPFS", err)
 	}
 	fmt.Println("Created IPFS hash: ", string(output))
 }

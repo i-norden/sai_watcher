@@ -33,8 +33,8 @@ func (car CupActionsRepository) CreateCupAction(cupAction models.CupAction, logI
 
 	_, err := car.DB.Exec(
 		`INSERT INTO maker.cup_action (log_id, id, tx, act, arg, lad, ink, art, ire, block, deleted, guy)
-                SELECT $1, $2, $3::VARCHAR, $4, NULLIF($5, ''), $6, $7::NUMERIC, $8::NUMERIC, $9::NUMERIC, $10, $11, $12
-                WHERE NOT EXISTS (SELECT tx FROM maker.cup_action WHERE tx = $3)`,
+                VALUES ($1, $2, $3::VARCHAR, $4, NULLIF($5, ''), $6, $7::NUMERIC, $8::NUMERIC, $9::NUMERIC, $10, $11, $12)
+                   ON CONFLICT DO NOTHING`,
 		logID, id, tx, act, arg, lad, ink, art, ire, block, deleted, guy)
 	if err != nil {
 		return err
