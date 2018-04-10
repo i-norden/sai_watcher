@@ -1,4 +1,5 @@
 .idea
+environments/*.toml
 sai_watcher
 vulcanize_schema.sql
 reports/

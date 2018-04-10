@@ -4,4 +4,4 @@ hostname = "localhost"
 port = 5432
 
 [client]
-ipcPath = "/Users/mattkrump/Library/Ethereum/geth.ipc"
+ipcPath = <local node's IPC filepath>
