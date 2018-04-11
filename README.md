@@ -59,12 +59,17 @@ This command syncs VulcanizeDB with the configured Ethereum node.
   - where `block-number` is a recent enough block to fetch contract data with your node
 
 ## Running the getEvents command
-`getEvents` starts up a process to watch for blocks on specified contracts, as well as specific log events associated with those contracts. It then stores transformed values in the following tables in the VulcanizeDB database:
+`getEvents` starts up a process to watch for blocks on specified contracts, as well as specific log events associated with those contracts. It then stores transformed values in the following tables and views in the VulcanizeDB database:
+
+Tables:
 - `maker.peps_everyblock`
 - `maker.cup_action`
 - `log_filters`
-- `maker.cup_action`
 - `maker.gov`
+
+Views:
+- `public.cup_act`
+- `public.cup`
 
 This command will need to be run against a full archive node. If a local full archive node is unavailable, see the previous point about running
 this command against infura.
