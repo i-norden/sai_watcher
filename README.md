@@ -76,8 +76,6 @@ We're using [PostGraphile](https://www.graphile.org/postgraphile/) to create a G
     - the `-c "postgresql://user@localhost:5432/vulcanize_public"` flag indicates which postgres connection postgraphile should be looking to, where `<user>` is your local postgres user
     - the `--schema=public,maker` flag indicates which schema(s) postgraphile should use to generate the GraphQL API
 
-_Note: the GraphQL schema located at `graphql_sever/schema.go`, and the command at `cmd/graphql.go` were from an initial implementation of GraphQL before PostGraphile was introduced, and is therefore out of date with the current schema._
-
 ## IPFS Reports
 This task creates a report of your database and persists it on IPFS.
 1. Run the command:
