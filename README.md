@@ -12,17 +12,26 @@ A [VulcanizeDB](https://github.com/vulcanize/VulcanizeDB) transformer for watchi
  - [IPFS](https://github.com/ipfs/go-ipfs#build-from-source)
 
 ## Installation
-1. Setup Postgres and an Ethereum node - see [VulcanizeDB README](https://github.com/vulcanize/VulcanizeDB/blob/master/README.md)
+1. Setup Postgres and an Ethereum node - see [VulcanizeDB README](https://github.com/vulcanize/VulcanizeDB/blob/master/README.md).
 1. `git clone git@github.com:8thlight/sai_watcher.git`
 
   _note: `go get` does not work for this project because need to run the (fixlibcrypto)[https://github.com/8thlight/sai_watcher/blob/master/Makefile] command along with `go build`._
-1. run the following commands:
-```
-make installtools
-make setup NAME=vulcanize_public
-make migrate NAME=vulcanize_public
-make build
-```
+1. Install dependencies:
+    ```
+    make installtools
+    ```
+1. Create the database based on the [VulcanizeDB schema](https://github.com/vulcanize/VulcanizeDB/blob/master/db/schema.sql):
+    ```
+    make setup NAME=vulcanize_public
+    ```
+1. Run the migrations to add project specific tables to the database:
+    ```
+    make migrate NAME=vulcanize_public
+    ```
+1. Build:
+    ```
+    make build
+    ```
 
 ## Configuration
 - To use a local Ethereum node, copy `environments/public.toml.example` to
