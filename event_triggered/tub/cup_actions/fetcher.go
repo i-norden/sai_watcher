@@ -20,7 +20,7 @@ import (
 )
 
 type CupFetcher struct {
-	Blockchain core.Blockchain
+	BlockChain core.BlockChain
 }
 
 var CupsContractMethod = "cups"
@@ -30,6 +30,12 @@ func (cupDataFetcher CupFetcher) FetchCupData(methodArg interface{}, blockNumber
 	address := tub.TubContractAddress
 	method := CupsContractMethod
 	result := &Cup{}
-	err := cupDataFetcher.Blockchain.FetchContractData(abiJSON, address, method, methodArg, result, blockNumber)
+	err := cupDataFetcher.BlockChain.FetchContractData(abiJSON, address, method, methodArg, result, blockNumber)
 	return result, err
+}
+
+func NewCupFetcher(blockChain core.BlockChain) CupFetcher {
+	return CupFetcher{
+		BlockChain: blockChain,
+	}
 }

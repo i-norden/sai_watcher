@@ -18,14 +18,22 @@ import (
 	"github.com/8thlight/sai_watcher/event_triggered/tub"
 	"github.com/8thlight/sai_watcher/event_triggered/tub/cup_actions"
 	"github.com/8thlight/sai_watcher/test_helpers"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/vulcanize/vulcanizedb/pkg/geth"
+	"github.com/vulcanize/vulcanizedb/pkg/geth/client"
+	rpc2 "github.com/vulcanize/vulcanizedb/pkg/geth/converters/rpc"
+	"github.com/vulcanize/vulcanizedb/pkg/geth/node"
+	"math/big"
 )
 
 var _ = Describe("Fetcher", func() {
 	It("fetches contract data", func() {
 		mockBlockchain := test_helpers.MockBlockchain{}
-		fetcher := cup_actions.CupFetcher{Blockchain: &mockBlockchain}
+		fetcher := cup_actions.CupFetcher{BlockChain: &mockBlockchain}
 		methodArg := "methodArg"
 		blockNumber := int64(12345)
 
@@ -45,5 +53,39 @@ var _ = Describe("Fetcher", func() {
 		Expect(len(mockBlockchain.BlockNumbers)).To(Equal(1))
 		Expect(mockBlockchain.BlockNumbers[0]).To(Equal(blockNumber))
 		Expect(1).To(Equal(1))
+	})
+
+	It("fetches cup data at the given block height", func() {
+		infuraIPC := "https://mainnet.infura.io/J5Vd2fRtGsw0zZ0Ov3BL"
+		rawRpcClient, err := rpc.Dial(infuraIPC)
+		Expect(err).NotTo(HaveOccurred())
+		rpcClient := client.NewRpcClient(rawRpcClient, infuraIPC)
+		ethClient := ethclient.NewClient(rawRpcClient)
+		blockChainClient := client.NewEthClient(ethClient)
+		node := node.MakeNode(rpcClient)
+		transactionConverter := rpc2.NewRpcTransactionConverter(ethClient)
+		blockChain := geth.NewBlockChain(blockChainClient, node, transactionConverter)
+		realFetcher := cup_actions.NewCupFetcher(blockChain)
+		cupID := "0x00000000000000000000000000000000000000000000000000000000000002c6"
+		args := common.HexToHash(cupID)
+		blockNumber := int64(5257349)
+		result, err := realFetcher.FetchCupData(args, blockNumber)
+
+		Expect(err).NotTo(HaveOccurred())
+		var ink, art, ire big.Int
+		ink.SetString("11536577693755896000", 10)
+		art.SetString("1991000000000000000000", 10)
+		ire.SetString("1989032743588388759284", 10)
+		expectedResult := cup_actions.Cup{
+			Lad: common.HexToAddress("0x9b4e28020b94b28f9f09ede87f588e89c283cffd"),
+			Ink: &ink,
+			Art: &art,
+			Ire: &ire,
+		}
+
+		Expect(result.Lad).To(Equal(expectedResult.Lad))
+		Expect(result.Ink.String()).To(Equal(expectedResult.Ink.String()))
+		Expect(result.Art.String()).To(Equal(expectedResult.Art.String()))
+		Expect(result.Ire.String()).To(Equal(expectedResult.Ire.String()))
 	})
 })
