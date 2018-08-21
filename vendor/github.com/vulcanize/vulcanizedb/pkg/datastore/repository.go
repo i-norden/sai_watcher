@@ -12,9 +12,9 @@ var ErrBlockDoesNotExist = func(blockNumber int64) error {
 }
 
 type BlockRepository interface {
-	CreateOrUpdateBlock(block core.Block) error
+	CreateOrUpdateBlock(block core.Block) (int64, error)
 	GetBlock(blockNumber int64) (core.Block, error)
-	MissingBlockNumbers(startingBlockNumber int64, endingBlockNumber int64) []int64
+	MissingBlockNumbers(startingBlockNumber, endingBlockNumber int64, nodeID string) []int64
 	SetBlocksStatus(chainHead int64)
 }
 
@@ -37,8 +37,14 @@ type FilterRepository interface {
 	GetFilter(name string) (filters.LogFilter, error)
 }
 
+type HeaderRepository interface {
+	CreateOrUpdateHeader(header core.Header) (int64, error)
+	GetHeader(blockNumber int64) (core.Header, error)
+	MissingBlockNumbers(startingBlockNumber, endingBlockNumber int64, nodeID string) []int64
+}
+
 type LogRepository interface {
-	CreateLogs(logs []core.Log) error
+	CreateLogs(logs []core.Log, receiptId int64) error
 	GetLogs(address string, blockNumber int64) []core.Log
 }
 
@@ -47,6 +53,8 @@ var ErrReceiptDoesNotExist = func(txHash string) error {
 }
 
 type ReceiptRepository interface {
+	CreateReceiptsAndLogs(blockId int64, receipts []core.Receipt) error
+	CreateReceipt(blockId int64, receipt core.Receipt) (int64, error)
 	GetReceipt(txHash string) (core.Receipt, error)
 }
 
