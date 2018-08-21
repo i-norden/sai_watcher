@@ -38,7 +38,7 @@ var GovFilter = filters.LogFilter{
 	Topics:    core.Topics{MoldActionHex},
 }
 
-func NewGovTransformer(db *postgres.DB, blockchain core.Blockchain) shared.Transformer {
+func NewGovTransformer(db *postgres.DB, blockchain core.BlockChain) shared.Transformer {
 	var transformer shared.Transformer
 	gr := DataStore{DB: db}
 	wer := repositories.WatchedEventRepository{DB: db}
@@ -55,7 +55,7 @@ func NewGovTransformer(db *postgres.DB, blockchain core.Blockchain) shared.Trans
 }
 
 type GovTransformer struct {
-	Blockchain             core.Blockchain
+	Blockchain             core.BlockChain
 	WatchedEventRepository datastore.WatchedEventRepository
 	Fetcher                GovFetcherInterface
 	GovRepository          Repository

@@ -31,7 +31,7 @@ var _ = Describe("Cup Modified transformer", func() {
 	It("fetches watched events for cup modified log filters", func() {
 		mockEventsRepo := test_helpers.MockWatchedEventsRepository{}
 		transformer := transformers.CupModifiedTransformer{
-			Blockchain:             nil,
+			BlockChain:             nil,
 			WatchedEventRepository: &mockEventsRepo,
 			CupActionsRepository:   &test_helpers.MockCupActionsRepository{},
 			Fetcher:                &test_helpers.MockCupFetcher{},
@@ -73,7 +73,7 @@ var _ = Describe("Cup Modified transformer", func() {
 			WatchedEventRepository: &mockWatchedEventsRepo,
 			FilterRepository:       nil,
 			Fetcher:                &mockFetcher,
-			Blockchain:             nil,
+			BlockChain:             nil,
 		}
 
 		transformer.Execute()
@@ -122,7 +122,7 @@ var _ = Describe("Cup Modified transformer", func() {
 			WatchedEventRepository: &mockWatchedEventsRepo,
 			FilterRepository:       nil,
 			Fetcher:                &mockFetcher,
-			Blockchain:             nil,
+			BlockChain:             nil,
 		}
 
 		transformer.Execute()

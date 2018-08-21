@@ -40,17 +40,17 @@ var CupCreatedFilter = filters.LogFilter{
 }
 
 type CupCreatedTransformer struct {
-	Blockchain             core.Blockchain
+	BlockChain             core.BlockChain
 	WatchedEventRepository datastore.WatchedEventRepository
 	CupActionsRepository   cup_actions.CupActionsRepositoryInterface
 }
 
-func NewCupCreatedTransformer(db *postgres.DB, blockchain core.Blockchain) shared.Transformer {
+func NewCupCreatedTransformer(db *postgres.DB, BlockChain core.BlockChain) shared.Transformer {
 	var transformer shared.Transformer
 	we := repositories.WatchedEventRepository{DB: db}
 	car := cup_actions.CupActionsRepository{DB: db}
 	transformer = &CupCreatedTransformer{
-		Blockchain:             blockchain,
+		BlockChain:             BlockChain,
 		WatchedEventRepository: we,
 		CupActionsRepository:   car,
 	}

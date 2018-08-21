@@ -16,15 +16,20 @@ package cmd
 
 import (
 	"log"
-
 	"time"
+
+	"github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/8thlight/sai_watcher/event_triggered"
 	"github.com/8thlight/sai_watcher/everyblock"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/cobra"
 	"github.com/vulcanize/vulcanizedb/libraries/shared"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
 	"github.com/vulcanize/vulcanizedb/pkg/geth"
+	"github.com/vulcanize/vulcanizedb/pkg/geth/client"
+	vRpc "github.com/vulcanize/vulcanizedb/pkg/geth/converters/rpc"
+	"github.com/vulcanize/vulcanizedb/pkg/geth/node"
 )
 
 // getEventsCmd represents the getEvents command
@@ -47,16 +52,25 @@ func init() {
 }
 
 func getEvents() {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(pollingInterval)
 	defer ticker.Stop()
-	blockchain := geth.NewBlockchain(ipc)
-	db, err := postgres.NewDB(databaseConfig, blockchain.Node())
+	rawRpcClient, err := rpc.Dial(ipc)
+	if err != nil {
+		log.Fatal(err)
+	}
+	rpcClient := client.NewRpcClient(rawRpcClient, ipc)
+	ethClient := ethclient.NewClient(rawRpcClient)
+	client := client.NewEthClient(ethClient)
+	node := node.MakeNode(rpcClient)
+	transactionConverter := vRpc.NewRpcTransactionConverter(client)
+	blockChain := geth.NewBlockChain(client, node, transactionConverter)
+	db, err := postgres.NewDB(databaseConfig, blockChain.Node())
 	if err != nil {
 		log.Fatal("DB")
 	}
 	watcher := shared.Watcher{
 		DB:         *db,
-		Blockchain: blockchain,
+		Blockchain: blockChain,
 	}
 	watcher.AddTransformers(event_triggered.TransformerInitializers())
 	watcher.AddTransformers(everyblock.TransformerInitializers())

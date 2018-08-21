@@ -18,9 +18,15 @@ import (
 	"github.com/8thlight/sai_watcher/event_triggered/tub"
 	"github.com/8thlight/sai_watcher/event_triggered/tub/gov"
 	"github.com/8thlight/sai_watcher/test_helpers"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/vulcanize/vulcanizedb/pkg/geth"
+	"github.com/vulcanize/vulcanizedb/pkg/geth/client"
+	vRpc "github.com/vulcanize/vulcanizedb/pkg/geth/converters/rpc"
+	"github.com/vulcanize/vulcanizedb/pkg/geth/node"
+	"log"
 )
 
 var _ = Describe("Gov Fetcher", func() {
@@ -104,25 +110,34 @@ var _ = Describe("Gov Fetcher", func() {
 		)
 
 		It("returns the correct converted values for a real gov", func() {
-			blockchain := geth.NewBlockchain(infuraIPC)
-			client := gov.GovFetcher{Blockchain: blockchain}
+			rawRpcClient, err := rpc.Dial(infuraIPC)
+			if err != nil {
+				log.Fatal(err)
+			}
+			rpcClient := client.NewRpcClient(rawRpcClient, infuraIPC)
+			ethClient := ethclient.NewClient(rawRpcClient)
+			client := client.NewEthClient(ethClient)
+			node := node.MakeNode(rpcClient)
+			transactionConverter := vRpc.NewRpcTransactionConverter(client)
+			blockChain := geth.NewBlockChain(client, node, transactionConverter)
+			govClient := gov.GovFetcher{Blockchain: blockChain}
 
-			result, err := client.FetchAxe(blockNumber)
+			result, err := govClient.FetchAxe(blockNumber)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.String()).To(Equal(axe))
-			result, err = client.FetchCap(blockNumber)
+			result, err = govClient.FetchCap(blockNumber)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.String()).To(Equal(cap_))
-			result, err = client.FetchFee(blockNumber)
+			result, err = govClient.FetchFee(blockNumber)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.String()).To(Equal(fee))
-			result, err = client.FetchGap(blockNumber)
+			result, err = govClient.FetchGap(blockNumber)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.String()).To(Equal(gap))
-			result, err = client.FetchMat(blockNumber)
+			result, err = govClient.FetchMat(blockNumber)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.String()).To(Equal(mat))
-			result, err = client.FetchTax(blockNumber)
+			result, err = govClient.FetchTax(blockNumber)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.String()).To(Equal(tax))
 

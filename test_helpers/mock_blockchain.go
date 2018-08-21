@@ -39,7 +39,11 @@ func (mb *MockBlockchain) FetchContractData(abiJSON string, address string, meth
 	return nil
 }
 
-func (MockBlockchain) GetBlockByNumber(blockNumber int64) core.Block {
+func (MockBlockchain) GetHeaderByNumber(blockNumber int64) (core.Header, error) {
+	panic("implement me")
+}
+
+func (MockBlockchain) GetBlockByNumber(blockNumber int64) (core.Block, error) {
 	panic("implement me")
 }
 

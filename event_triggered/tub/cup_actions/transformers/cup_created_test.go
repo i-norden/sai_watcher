@@ -52,7 +52,7 @@ var _ = Describe("Cup Created Transformer", func() {
 	It("fetches watched events for cup created filter", func() {
 		mockEventsRepo := test_helpers.MockWatchedEventsRepository{ReturnEvents: returnEvents}
 		transformer := transformers.CupCreatedTransformer{
-			Blockchain:             nil,
+			BlockChain:             nil,
 			WatchedEventRepository: &mockEventsRepo,
 			CupActionsRepository:   &test_helpers.MockCupActionsRepository{},
 		}
@@ -67,7 +67,7 @@ var _ = Describe("Cup Created Transformer", func() {
 		mockEventsRepo := test_helpers.MockWatchedEventsRepository{ReturnEvents: returnEvents}
 		mockCupActionsRepo := test_helpers.MockCupActionsRepository{}
 		transformer := transformers.CupCreatedTransformer{
-			Blockchain:             nil,
+			BlockChain:             nil,
 			WatchedEventRepository: &mockEventsRepo,
 			CupActionsRepository:   &mockCupActionsRepo,
 		}

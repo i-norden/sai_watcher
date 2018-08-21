@@ -32,7 +32,7 @@ type CupModifiedTransformer struct {
 	WatchedEventRepository datastore.WatchedEventRepository
 	FilterRepository       datastore.FilterRepository
 	Fetcher                cup_actions.CupFetcherInterface
-	Blockchain             core.Blockchain
+	BlockChain             core.BlockChain
 }
 
 var GiveActionHex = "0xbaa8529c00000000000000000000000000000000000000000000000000000000"
@@ -95,17 +95,17 @@ var CupModifiedFilters = []filters.LogFilter{
 	},
 }
 
-func NewCupModifiedTransformer(db *postgres.DB, blockchain core.Blockchain) shared.Transformer {
+func NewCupModifiedTransformer(db *postgres.DB, BlockChain core.BlockChain) shared.Transformer {
 	car := cup_actions.CupActionsRepository{DB: db}
 	fr := repositories.FilterRepository{DB: db}
 	wer := repositories.WatchedEventRepository{DB: db}
-	fetcher := cup_actions.CupFetcher{Blockchain: blockchain}
+	fetcher := cup_actions.CupFetcher{BlockChain: BlockChain}
 	for _, filter := range CupModifiedFilters {
 		fr.CreateFilter(filter)
 	}
 	return &CupModifiedTransformer{
 		CupActionsRepository:   car,
-		Blockchain:             blockchain,
+		BlockChain:             BlockChain,
 		FilterRepository:       fr,
 		WatchedEventRepository: wer,
 		Fetcher:                fetcher,

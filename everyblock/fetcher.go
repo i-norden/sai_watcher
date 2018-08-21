@@ -23,14 +23,14 @@ import (
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 )
 
-func NewFetcher(blockchain core.Blockchain) *Fetcher {
+func NewFetcher(blockchain core.BlockChain) *Fetcher {
 	return &Fetcher{
 		blockchain: blockchain,
 	}
 }
 
 type Fetcher struct {
-	blockchain core.Blockchain
+	blockchain core.BlockChain
 }
 
 type Value [32]byte

@@ -50,7 +50,7 @@ var _ = Describe("Cup Actions Repository", func() {
 
 	Describe("Creating a cup action", func() {
 		It("persists a cup action model", func() {
-			err := logRepository.CreateLogs([]core.Log{{}})
+			err := logRepository.CreateLogs([]core.Log{{}}, 123)
 			Expect(err).ToNot(HaveOccurred())
 			var logID int64
 			err = logRepository.Get(&logID, `Select id from logs`)
@@ -109,7 +109,7 @@ var _ = Describe("Cup Actions Repository", func() {
 		})
 
 		It("does not allow more than one cup action (with same act, arg) per transaction", func() {
-			err := logRepository.CreateLogs([]core.Log{{}, {}, {}})
+			err := logRepository.CreateLogs([]core.Log{{}, {}, {}}, 123)
 			Expect(err).ToNot(HaveOccurred())
 			var logIDs []int64
 			err = logRepository.Select(&logIDs, `Select id from logs`)
@@ -150,23 +150,23 @@ var _ = Describe("Cup Actions Repository", func() {
 			}
 			cupActionDuplicate := cupActionUniqueOne
 
-			cup_actions_repo := cup_actions.CupActionsRepository{DB: db}
-			err = cup_actions_repo.CreateCupAction(cupActionUniqueOne, logIDs[0])
+			cupActionsRepo := cup_actions.CupActionsRepository{DB: db}
+			err = cupActionsRepo.CreateCupAction(cupActionUniqueOne, logIDs[0])
 			Expect(err).ToNot(HaveOccurred())
-			err = cup_actions_repo.CreateCupAction(cupActionUniqueTwo, logIDs[1])
+			err = cupActionsRepo.CreateCupAction(cupActionUniqueTwo, logIDs[1])
 			Expect(err).ToNot(HaveOccurred())
-			err = cup_actions_repo.CreateCupAction(cupActionDuplicate, logIDs[2])
+			err = cupActionsRepo.CreateCupAction(cupActionDuplicate, logIDs[2])
 			Expect(err).ToNot(HaveOccurred())
 
 			var cupCount int
-			cup_actions_repo.DB.Get(&cupCount, `Select count(*) from maker.cup_action`)
+			cupActionsRepo.DB.Get(&cupCount, `Select count(*) from maker.cup_action`)
 			Expect(cupCount).To(Equal(2))
 		})
 	})
 
 	Describe("Handling reorgs", func() {
 		It("removes a cup action when corresponding log is removed", func() {
-			err := logRepository.CreateLogs([]core.Log{{}})
+			err := logRepository.CreateLogs([]core.Log{{}}, 123)
 			Expect(err).ToNot(HaveOccurred())
 			var logID int64
 			err = logRepository.Get(&logID, `Select id from logs`)
@@ -186,15 +186,15 @@ var _ = Describe("Cup Actions Repository", func() {
 			}
 
 			//confirm newly created cup action is present
-			cup_actions_repo := cup_actions.CupActionsRepository{DB: db}
-			err = cup_actions_repo.CreateCupAction(cupAction, logID)
+			cupActionsRepo := cup_actions.CupActionsRepository{DB: db}
+			err = cupActionsRepo.CreateCupAction(cupAction, logID)
 			Expect(err).ToNot(HaveOccurred())
 			type dbRow struct {
 				LogId int64 `db:"log_id"`
 				models.CupAction
 			}
 			result := &dbRow{}
-			err = cup_actions_repo.DB.QueryRowx(
+			err = cupActionsRepo.DB.QueryRowx(
 				`SELECT * FROM maker.cup_action WHERE log_id = $1`, logID).StructScan(result)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(result.LogId).To(Equal(logID))
@@ -219,14 +219,14 @@ var _ = Describe("Cup Actions Repository", func() {
 	Describe("Getting all cups", func() {
 		It("returns all existing cups", func() {
 			// Create blocks for cup view
-			blocksRepo := repositories.BlockRepository{db}
+			blocksRepo := repositories.NewBlockRepository(db)
 			blockNumberOne := int64(1234)
 			blockOne := core.Block{Number: blockNumberOne}
-			err := blocksRepo.CreateOrUpdateBlock(blockOne)
+			_, err := blocksRepo.CreateOrUpdateBlock(blockOne)
 			Expect(err).NotTo(HaveOccurred())
 			blockNumberTwo := int64(5678)
 			blockTwo := core.Block{Number: blockNumberTwo}
-			err = blocksRepo.CreateOrUpdateBlock(blockTwo)
+			_, err = blocksRepo.CreateOrUpdateBlock(blockTwo)
 			Expect(err).NotTo(HaveOccurred())
 
 			// Create peps everyblock data for cups view
@@ -241,14 +241,14 @@ var _ = Describe("Cup Actions Repository", func() {
 				OK:    false,
 			}
 			per := everyblock.Per{Value: ray}
-			pepsRepository := everyblock.DataStore{db}
+			pepsRepository := everyblock.DataStore{DB: db}
 			err = pepsRepository.Create(blockNumberOne, pep, pip, per)
 			Expect(err).ToNot(HaveOccurred())
 			err = pepsRepository.Create(blockNumberTwo, pep, pip, per)
 			Expect(err).ToNot(HaveOccurred())
 
 			// Create logs for cup actions
-			err = logRepository.CreateLogs([]core.Log{{}, {}})
+			err = logRepository.CreateLogs([]core.Log{{}, {}}, 123)
 			Expect(err).ToNot(HaveOccurred())
 			var logIDs []int64
 			err = logRepository.DB.Select(&logIDs, `Select id from logs`)
@@ -256,7 +256,7 @@ var _ = Describe("Cup Actions Repository", func() {
 			Expect(len(logIDs)).To(Equal(2))
 
 			// Create cup actions
-			cup_actions_repo := cup_actions.CupActionsRepository{db}
+			cupActionsRepo := cup_actions.CupActionsRepository{DB: db}
 			actOne := "wipe"
 			artOne := "1"
 			idOne := int64(2)
@@ -276,7 +276,7 @@ var _ = Describe("Cup Actions Repository", func() {
 				Deleted:         false,
 				Guy:             "guy1",
 			}
-			err = cup_actions_repo.CreateCupAction(cupActionOne, logIDs[0])
+			err = cupActionsRepo.CreateCupAction(cupActionOne, logIDs[0])
 			Expect(err).NotTo(HaveOccurred())
 			actTwo := "lock"
 			artTwo := "5"
@@ -297,10 +297,10 @@ var _ = Describe("Cup Actions Repository", func() {
 				Deleted:         true,
 				Guy:             "guy2",
 			}
-			err = cup_actions_repo.CreateCupAction(cupActionTwo, logIDs[1])
+			err = cupActionsRepo.CreateCupAction(cupActionTwo, logIDs[1])
 			Expect(err).NotTo(HaveOccurred())
 
-			results, err := cup_actions_repo.GetAllCupData()
+			results, err := cupActionsRepo.GetAllCupData()
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(len(results)).To(Equal(2))
@@ -345,10 +345,10 @@ var _ = Describe("Cup Actions Repository", func() {
 		})
 
 		It("can scan ratios that are null", func() {
-			blocksRepo := repositories.BlockRepository{db}
+			blocksRepo := repositories.NewBlockRepository(db)
 			blockNumber := int64(1234)
 			blockOne := core.Block{Number: blockNumber}
-			err := blocksRepo.CreateOrUpdateBlock(blockOne)
+			_, err := blocksRepo.CreateOrUpdateBlock(blockOne)
 			Expect(err).NotTo(HaveOccurred())
 
 			ray := big.NewInt(0)
@@ -362,17 +362,17 @@ var _ = Describe("Cup Actions Repository", func() {
 				OK:    false,
 			}
 			per := everyblock.Per{Value: ray}
-			pepsRepository := everyblock.DataStore{db}
+			pepsRepository := everyblock.DataStore{DB: db}
 			err = pepsRepository.Create(blockNumber, pep, pip, per)
 			Expect(err).ToNot(HaveOccurred())
 
-			err = logRepository.CreateLogs([]core.Log{{}})
+			err = logRepository.CreateLogs([]core.Log{{}}, 123)
 			Expect(err).ToNot(HaveOccurred())
 			var logID int64
 			err = logRepository.Get(&logID, `Select id from logs`)
 			Expect(err).ToNot(HaveOccurred())
 
-			cup_actions_repo := cup_actions.CupActionsRepository{db}
+			cupActionsRepo := cup_actions.CupActionsRepository{DB: db}
 			actOne := "wipe"
 			artOne := "0"
 			idOne := int64(2)
@@ -392,10 +392,10 @@ var _ = Describe("Cup Actions Repository", func() {
 				Deleted:         false,
 				Guy:             "guy1",
 			}
-			err = cup_actions_repo.CreateCupAction(cupActionOne, logID)
+			err = cupActionsRepo.CreateCupAction(cupActionOne, logID)
 			Expect(err).NotTo(HaveOccurred())
 
-			results, err := cup_actions_repo.GetAllCupData()
+			results, err := cupActionsRepo.GetAllCupData()
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(len(results)).To(Equal(1))

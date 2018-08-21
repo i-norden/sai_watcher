@@ -18,10 +18,16 @@ import (
 	"math/big"
 
 	"github.com/8thlight/sai_watcher/everyblock"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/geth"
+	"github.com/vulcanize/vulcanizedb/pkg/geth/client"
+	vRpc "github.com/vulcanize/vulcanizedb/pkg/geth/converters/rpc"
+	"github.com/vulcanize/vulcanizedb/pkg/geth/node"
+	"log"
 )
 
 type fakeContractDataFetcher struct {
@@ -34,7 +40,11 @@ type fakeContractDataFetcher struct {
 	lastBlock    *big.Int
 }
 
-func (cdf *fakeContractDataFetcher) GetBlockByNumber(blockNumber int64) core.Block {
+func (cdf *fakeContractDataFetcher) GetBlockByNumber(blockNumber int64) (core.Block, error) {
+	panic("implement me")
+}
+
+func (cdf *fakeContractDataFetcher) GetHeaderByNumber(blockNumber int64) (core.Header, error) {
 	panic("implement me")
 }
 
@@ -62,8 +72,20 @@ func (cdf *fakeContractDataFetcher) FetchContractData(abiJSON string, address st
 
 var _ = Describe("Medianizer Data Fetcher", func() {
 	var infuraIPC string
+	var fetcherClient *everyblock.Fetcher
 	BeforeEach(func() {
 		infuraIPC = "https://mainnet.infura.io/J5Vd2fRtGsw0zZ0Ov3BL"
+		rawRpcClient, err := rpc.Dial(infuraIPC)
+		if err != nil {
+			log.Fatal(err)
+		}
+		rpcClient := client.NewRpcClient(rawRpcClient, infuraIPC)
+		ethClient := ethclient.NewClient(rawRpcClient)
+		client := client.NewEthClient(ethClient)
+		node := node.MakeNode(rpcClient)
+		transactionConverter := vRpc.NewRpcTransactionConverter(client)
+		blockChain := geth.NewBlockChain(client, node, transactionConverter)
+		fetcherClient = everyblock.NewFetcher(blockChain)
 	})
 
 	Describe("Getting medianizer attributes", func() {
@@ -103,10 +125,8 @@ var _ = Describe("Medianizer Data Fetcher", func() {
 	})
 
 	It("makes call to real blockchain", func() {
-		blockchain := geth.NewBlockchain(infuraIPC)
-		client := everyblock.NewFetcher(blockchain)
 
-		result, err := client.FetchPepData(nil, 5136253)
+		result, err := fetcherClient.FetchPepData(nil, 5136253)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(result.Value.Hex()).To(Equal("0x0000000000000000000000000000000000000000000000359d858309aa630800"))
 		Expect(result.Value.String()).To(Equal("989028058420000000000"))
@@ -122,29 +142,23 @@ var _ = Describe("Medianizer Data Fetcher", func() {
 		)
 
 		It("returns the correct converted values for a real pep", func() {
-			blockchain := geth.NewBlockchain(infuraIPC)
-			client := everyblock.NewFetcher(blockchain)
 
-			result, err := client.FetchPepData(nil, blockNumber)
+			result, err := fetcherClient.FetchPepData(nil, blockNumber)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Wad()).To(Equal(pep))
 
 		})
 		It("returns the correct converted values for a real pip", func() {
-			blockchain := geth.NewBlockchain(infuraIPC)
-			client := everyblock.NewFetcher(blockchain)
 
-			result, err := client.FetchPipData(nil, blockNumber)
+			result, err := fetcherClient.FetchPipData(nil, blockNumber)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Wad()).To(Equal(pip))
 
 		})
 
 		It("returns the correct converted values for a real per", func() {
-			blockchain := geth.NewBlockchain(infuraIPC)
-			client := everyblock.NewFetcher(blockchain)
 
-			result, err := client.FetchPerData(nil, blockNumber)
+			result, err := fetcherClient.FetchPerData(nil, blockNumber)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Ray()).To(Equal(per))
 

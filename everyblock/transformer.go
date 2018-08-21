@@ -25,7 +25,7 @@ import (
 
 type Transformer struct {
 	Repository
-	core.Blockchain
+	core.BlockChain
 }
 
 var PepsFilter = filters.LogFilter{
@@ -36,7 +36,7 @@ var PepsFilter = filters.LogFilter{
 	Topics:    core.Topics{"0x296ba4ca62c6c21c95e828080cb8aec7481b71390585605300a8a76f9e95b527"},
 }
 
-func NewPepTransformer(db *postgres.DB, blockchain core.Blockchain) shared.Transformer {
+func NewPepTransformer(db *postgres.DB, blockchain core.BlockChain) shared.Transformer {
 	var transformer shared.Transformer
 	pr := DataStore{DB: db}
 	transformer = &Transformer{pr, blockchain}
@@ -44,7 +44,7 @@ func NewPepTransformer(db *postgres.DB, blockchain core.Blockchain) shared.Trans
 }
 
 func (pepTransformer *Transformer) Execute() error {
-	fetcher := NewFetcher(pepTransformer.Blockchain)
+	fetcher := NewFetcher(pepTransformer.BlockChain)
 	lastBlock := fetcher.blockchain.LastBlock().Int64()
 	var blockUpperBound int64
 	switch PepsFilter.ToBlock {

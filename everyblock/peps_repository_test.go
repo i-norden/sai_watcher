@@ -45,12 +45,12 @@ var _ = Describe("Peps Repository", func() {
 		db.Query(`DELETE FROM logs`)
 		db.Query(`DELETE FROM log_filters`)
 		pepsRepository = everyblock.DataStore{DB: db}
-		blockRepository = repositories.BlockRepository{DB: db}
+		blockRepository = *repositories.NewBlockRepository(db)
 	})
 
 	Describe("Creating a new pep record", func() {
 		It("inserts new pep peek result with data", func() {
-			err := blockRepository.CreateOrUpdateBlock(core.Block{Number: 10, Time: int64(100)})
+			_, err := blockRepository.CreateOrUpdateBlock(core.Block{Number: 10, Time: int64(100)})
 			Expect(err).ToNot(HaveOccurred())
 			ray := big.NewInt(0)
 			ray.SetString("10000000000000000000000000000", 10)
@@ -84,10 +84,10 @@ var _ = Describe("Peps Repository", func() {
 				Number:       blockNumber,
 				Transactions: []core.Transaction{{}},
 			}
-			err := blockRepository.CreateOrUpdateBlock(block)
+			_, err := blockRepository.CreateOrUpdateBlock(block)
 			Expect(err).ToNot(HaveOccurred())
 			var blockID int64
-			err = blockRepository.Get(&blockID, `Select id from blocks`)
+			err = blockRepository.GetInt(&blockID, `Select id from blocks`)
 			Expect(err).NotTo(HaveOccurred())
 
 			// confirm newly created Pep is present with existing block ID
@@ -105,10 +105,10 @@ var _ = Describe("Peps Repository", func() {
 			Expect(result.BlockID).To(Equal(blockID))
 
 			// block is removed because of reorg
-			_, err = blockRepository.DB.Exec(`DELETE FROM blocks WHERE id = $1`, blockID)
+			_, err = blockRepository.Exec(`DELETE FROM blocks WHERE id = $1`, blockID)
 			Expect(err).ToNot(HaveOccurred())
-			var blockCount int
-			err = blockRepository.Get(&blockCount, `SELECT count(*) FROM logs WHERE id = $1`, blockID)
+			var blockCount int64
+			err = blockRepository.GetInt(&blockCount, `SELECT count(*) FROM logs WHERE id = $1`, blockID)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(blockCount).To(BeZero())
 
@@ -124,7 +124,7 @@ var _ = Describe("Peps Repository", func() {
 	Describe("Fetching missing blocks", func() {
 		It("returns values that do not have a record AND are in vulcanize db within a block range", func() {
 			for i := 0; i < 11; i++ {
-				err = blockRepository.CreateOrUpdateBlock(core.Block{Number: int64(i)})
+				_, err = blockRepository.CreateOrUpdateBlock(core.Block{Number: int64(i)})
 				Expect(err).ToNot(HaveOccurred())
 			}
 
@@ -154,7 +154,7 @@ var _ = Describe("Peps Repository", func() {
 	Describe("Getting all rows", func() {
 		It("returns data for every row", func() {
 			blockNumberOne := int64(1)
-			err := blockRepository.CreateOrUpdateBlock(core.Block{Number: blockNumberOne, Time: int64(100)})
+			_, err := blockRepository.CreateOrUpdateBlock(core.Block{Number: blockNumberOne, Time: int64(100)})
 			Expect(err).ToNot(HaveOccurred())
 			rayOne := big.NewInt(0)
 			rayOne.SetString("20000000000000000000000000000", 10)
@@ -169,7 +169,7 @@ var _ = Describe("Peps Repository", func() {
 			perOne := everyblock.Per{Value: rayOne}
 			err = pepsRepository.Create(blockNumberOne, pepOne, pipOne, perOne)
 			blockNumberTwo := int64(2)
-			err = blockRepository.CreateOrUpdateBlock(core.Block{Number: blockNumberTwo, Time: int64(100)})
+			_, err = blockRepository.CreateOrUpdateBlock(core.Block{Number: blockNumberTwo, Time: int64(100)})
 			Expect(err).ToNot(HaveOccurred())
 			rayTwo := big.NewInt(0)
 			rayTwo.SetString("30000000000000000000000000000", 10)

@@ -31,7 +31,11 @@ type FakeBlockchain struct {
 	result    everyblock.Peek
 }
 
-func (fakePepFetcher FakeBlockchain) GetBlockByNumber(blockNumber int64) core.Block {
+func (fakePepFetcher FakeBlockchain) GetBlockByNumber(blockNumber int64) (core.Block, error) {
+	panic("implement me")
+}
+
+func (fakePepFetcher FakeBlockchain) GetHeaderByNumber(blockNumber int64) (core.Header, error) {
 	panic("implement me")
 }
 
@@ -76,7 +80,7 @@ var _ bool = Describe("pep updater", func() {
 		pepsRepository := &test_helpers.MockEveryBlockDataStore{MissingBlocksData: int64s}
 		pepUpdater = &everyblock.Transformer{
 			Repository: pepsRepository,
-			Blockchain: blockchain,
+			BlockChain: blockchain,
 		}
 
 		pepUpdater.Execute()
@@ -92,7 +96,7 @@ var _ bool = Describe("pep updater", func() {
 		firstBlock := filterFirstBlock.Int64()
 		int64s := []int64{firstBlock, firstBlock + 1, firstBlock + 2, firstBlock + 3, firstBlock + 4}
 		pepsRepository := &test_helpers.MockEveryBlockDataStore{MissingBlocksData: int64s}
-		pepUpdater = &everyblock.Transformer{Repository: pepsRepository, Blockchain: blockchain}
+		pepUpdater = &everyblock.Transformer{Repository: pepsRepository, BlockChain: blockchain}
 
 		pepUpdater.Execute()
 

@@ -15,18 +15,21 @@
 package cmd
 
 import (
+	"log"
 	"os"
-
 	"time"
 
-	"log"
-
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/spf13/cobra"
 	"github.com/vulcanize/vulcanizedb/pkg/core"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres"
 	"github.com/vulcanize/vulcanizedb/pkg/datastore/postgres/repositories"
 	"github.com/vulcanize/vulcanizedb/pkg/geth"
+	"github.com/vulcanize/vulcanizedb/pkg/geth/client"
+	vRpc "github.com/vulcanize/vulcanizedb/pkg/geth/converters/rpc"
+	"github.com/vulcanize/vulcanizedb/pkg/geth/node"
 	"github.com/vulcanize/vulcanizedb/pkg/history"
 )
 
@@ -64,7 +67,7 @@ func init() {
 	syncCmd.Flags().IntVarP(&startingBlockNumber, "starting-block-number", "s", 0, "Block number to start syncing from")
 }
 
-func backFillAllBlocks(blockchain core.Blockchain, blockRepository datastore.BlockRepository, missingBlocksPopulated chan int, startingBlockNumber int64) {
+func backFillAllBlocks(blockchain core.BlockChain, blockRepository datastore.BlockRepository, missingBlocksPopulated chan int, startingBlockNumber int64) {
 	go func() {
 		missingBlocksPopulated <- history.PopulateMissingBlocks(blockchain, blockRepository, startingBlockNumber)
 	}()
@@ -73,21 +76,29 @@ func backFillAllBlocks(blockchain core.Blockchain, blockRepository datastore.Blo
 func sync() {
 	ticker := time.NewTicker(pollingInterval)
 	defer ticker.Stop()
-
-	blockchain := geth.NewBlockchain(ipc)
-	if blockchain.LastBlock().Int64() == 0 {
-		log.Fatal("geth initial: state sync not finished")
-	}
-	db, err := postgres.NewDB(databaseConfig, blockchain.Node())
+	rawRpcClient, err := rpc.Dial(ipc)
 	if err != nil {
 		log.Fatal(err)
 	}
-	blockRepository := repositories.BlockRepository{DB: db}
-	validator := history.NewBlockValidator(blockchain, blockRepository, 15)
+	rpcClient := client.NewRpcClient(rawRpcClient, ipc)
+	ethClient := ethclient.NewClient(rawRpcClient)
+	client := client.NewEthClient(ethClient)
+	node := node.MakeNode(rpcClient)
+	transactionConverter := vRpc.NewRpcTransactionConverter(client)
+	blockChain := geth.NewBlockChain(client, node, transactionConverter)
+	if blockChain.LastBlock().Int64() == 0 {
+		log.Fatal("geth initial: state sync not finished")
+	}
+	db, err := postgres.NewDB(databaseConfig, blockChain.Node())
+	if err != nil {
+		log.Fatal(err)
+	}
+	blockRepository := repositories.NewBlockRepository(db)
+	validator := history.NewBlockValidator(blockChain, blockRepository, 15)
 
 	missingBlocksPopulated := make(chan int)
 	_startingBlockNumber := int64(startingBlockNumber)
-	go backFillAllBlocks(blockchain, blockRepository, missingBlocksPopulated, _startingBlockNumber)
+	go backFillAllBlocks(blockChain, blockRepository, missingBlocksPopulated, _startingBlockNumber)
 
 	for {
 		select {
@@ -95,7 +106,7 @@ func sync() {
 			window := validator.ValidateBlocks()
 			validator.Log(os.Stdout, window)
 		case <-missingBlocksPopulated:
-			go backFillAllBlocks(blockchain, blockRepository, missingBlocksPopulated, _startingBlockNumber)
+			go backFillAllBlocks(blockChain, blockRepository, missingBlocksPopulated, _startingBlockNumber)
 		}
 	}
 }

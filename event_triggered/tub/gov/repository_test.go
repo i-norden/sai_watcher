@@ -43,7 +43,7 @@ var _ = Describe("Gov Repository", func() {
 
 	Describe("Creating a gov", func() {
 		It("persists a gov model", func() {
-			err := logRepository.CreateLogs([]core.Log{{}})
+			err := logRepository.CreateLogs([]core.Log{{}}, 123)
 			Expect(err).ToNot(HaveOccurred())
 			var logID int64
 			err = logRepository.Get(&logID, `Select id from logs`)
@@ -97,7 +97,7 @@ var _ = Describe("Gov Repository", func() {
 		})
 
 		It("does not duplicate govs from the same transaction", func() {
-			err := logRepository.CreateLogs([]core.Log{{}, {}})
+			err := logRepository.CreateLogs([]core.Log{{}, {}}, 123)
 			Expect(err).ToNot(HaveOccurred())
 			var logIDs []int64
 			err = logRepository.DB.Select(&logIDs, `Select id from logs`)
@@ -129,7 +129,7 @@ var _ = Describe("Gov Repository", func() {
 				Axe:   "2",
 				Gap:   "2",
 			}
-			repo := gov.DataStore{db}
+			repo := gov.DataStore{DB: db}
 
 			err = repo.CreateGov(&govOne, logIDs[0])
 			err = repo.CreateGov(&govTwo, logIDs[1])
@@ -143,7 +143,7 @@ var _ = Describe("Gov Repository", func() {
 
 	Describe("Handling reorgs", func() {
 		It("removes a gov when corresponding log is removed", func() {
-			err := logRepository.CreateLogs([]core.Log{{}})
+			err := logRepository.CreateLogs([]core.Log{{}}, 123)
 			Expect(err).ToNot(HaveOccurred())
 			var logID int64
 			err = logRepository.Get(&logID, `Select id from logs`)
@@ -164,15 +164,15 @@ var _ = Describe("Gov Repository", func() {
 			}
 
 			//confirm newly created gov is present
-			gov_repo := gov.DataStore{DB: db}
-			err = gov_repo.CreateGov(govEvent, logID)
+			govRepo := gov.DataStore{DB: db}
+			err = govRepo.CreateGov(govEvent, logID)
 			Expect(err).ToNot(HaveOccurred())
 			type dbRow struct {
 				LogId int64 `db:"log_id"`
 				gov.GovModel
 			}
 			result := &dbRow{}
-			err = gov_repo.DB.QueryRowx(
+			err = govRepo.DB.QueryRowx(
 				`SELECT * FROM maker.gov WHERE log_id = $1`, logID).StructScan(result)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(result.LogId).To(Equal(logID))
@@ -196,14 +196,14 @@ var _ = Describe("Gov Repository", func() {
 
 	Describe("Fetching all govs", func() {
 		It("returns all govs", func() {
-			err := logRepository.CreateLogs([]core.Log{{}, {}})
+			err := logRepository.CreateLogs([]core.Log{{}, {}}, 123)
 			Expect(err).ToNot(HaveOccurred())
 			var logIDs []int64
 			err = logRepository.DB.Select(&logIDs, `Select id from logs`)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(len(logIDs)).To(Equal(2))
 
-			gov_repo := gov.DataStore{db}
+			govRepo := gov.DataStore{DB: db}
 			blockNumberOne := int64(1)
 			govOne := gov.GovModel{
 				Block: blockNumberOne,
@@ -218,7 +218,7 @@ var _ = Describe("Gov Repository", func() {
 				Axe:   "6",
 				Gap:   "7",
 			}
-			err = gov_repo.CreateGov(&govOne, logIDs[0])
+			err = govRepo.CreateGov(&govOne, logIDs[0])
 			Expect(err).NotTo(HaveOccurred())
 			blockNumberTwo := int64(2)
 			govTwo := gov.GovModel{
@@ -234,10 +234,10 @@ var _ = Describe("Gov Repository", func() {
 				Axe:   "13",
 				Gap:   "14",
 			}
-			err = gov_repo.CreateGov(&govTwo, logIDs[1])
+			err = govRepo.CreateGov(&govTwo, logIDs[1])
 			Expect(err).NotTo(HaveOccurred())
 
-			results, err := gov_repo.GetAllGovData()
+			results, err := govRepo.GetAllGovData()
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(len(results)).To(Equal(2))

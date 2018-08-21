@@ -23,7 +23,7 @@ import (
 )
 
 type GovFetcher struct {
-	Blockchain core.Blockchain
+	Blockchain core.BlockChain
 }
 
 func (gf GovFetcher) FetchCap(blockNumber int64) (*big.Int, error) {
