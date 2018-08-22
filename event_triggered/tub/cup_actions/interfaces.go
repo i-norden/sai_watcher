@@ -22,5 +22,5 @@ type CupActionsRepositoryInterface interface {
 }
 
 type CupFetcherInterface interface {
-	FetchCupData(methodArg interface{}, blockNumber int64) (*Cup, error)
+	FetchCupData(methodArgs []interface{}, blockNumber int64) (*Cup, error)
 }

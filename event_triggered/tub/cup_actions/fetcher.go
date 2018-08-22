@@ -25,12 +25,12 @@ type CupFetcher struct {
 
 var CupsContractMethod = "cups"
 
-func (cupDataFetcher CupFetcher) FetchCupData(methodArg interface{}, blockNumber int64) (*Cup, error) {
+func (cupDataFetcher CupFetcher) FetchCupData(methodArgs []interface{}, blockNumber int64) (*Cup, error) {
 	abiJSON := tub.TubContractABI
 	address := tub.TubContractAddress
 	method := CupsContractMethod
 	result := &Cup{}
-	err := cupDataFetcher.BlockChain.FetchContractData(abiJSON, address, method, methodArg, result, blockNumber)
+	err := cupDataFetcher.BlockChain.FetchContractData(abiJSON, address, method, methodArgs, result, blockNumber)
 	return result, err
 }
 

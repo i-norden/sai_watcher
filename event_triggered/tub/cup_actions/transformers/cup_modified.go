@@ -127,7 +127,12 @@ func (cmh CupModifiedTransformer) Execute() error {
 
 func createCupAction(cmh CupModifiedTransformer, watchedEvent *core.WatchedEvent) {
 	args := common.HexToHash(watchedEvent.Topic2)
-	cup, err := cmh.Fetcher.FetchCupData(args, watchedEvent.BlockNumber)
+	hashArgs := []common.Hash{args}
+	interfaceArgs := make([]interface{}, len(hashArgs))
+	for i, s := range hashArgs {
+		interfaceArgs[i] = s
+	}
+	cup, err := cmh.Fetcher.FetchCupData(interfaceArgs, watchedEvent.BlockNumber)
 	if err != nil {
 		log.Println("Error fetching cup data: ", err)
 	}

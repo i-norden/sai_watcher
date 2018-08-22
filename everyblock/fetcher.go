@@ -57,7 +57,7 @@ func (value Value) String() string {
 	return bi.String()
 }
 
-func (gethCupDataFetcher *Fetcher) FetchPepData(methodArg interface{}, blockNumber int64) (*Peek, error) {
+func (gethCupDataFetcher *Fetcher) FetchPepData(methodArgs []interface{}, blockNumber int64) (*Peek, error) {
 	abiJSON := MedianizerABI
 	pepAddress := PepAddress
 	method := "peek"
@@ -69,12 +69,12 @@ func (gethCupDataFetcher *Fetcher) FetchPepData(methodArg interface{}, blockNumb
 		ret0,
 		ret1,
 	}
-	err := gethCupDataFetcher.blockchain.FetchContractData(abiJSON, pepAddress, method, methodArg, r, blockNumber)
+	err := gethCupDataFetcher.blockchain.FetchContractData(abiJSON, pepAddress, method, methodArgs, r, blockNumber)
 	result := newResult(*ret0, *ret1)
 	return result, err
 }
 
-func (gethCupDataFetcher *Fetcher) FetchPipData(methodArg interface{}, blockNumber int64) (*Peek, error) {
+func (gethCupDataFetcher *Fetcher) FetchPipData(methodArgs []interface{}, blockNumber int64) (*Peek, error) {
 	abiJSON := MedianizerABI
 	pipAddress := PipAddress
 	method := "peek"
@@ -86,7 +86,7 @@ func (gethCupDataFetcher *Fetcher) FetchPipData(methodArg interface{}, blockNumb
 		ret0,
 		ret1,
 	}
-	err := gethCupDataFetcher.blockchain.FetchContractData(abiJSON, pipAddress, method, methodArg, r, blockNumber)
+	err := gethCupDataFetcher.blockchain.FetchContractData(abiJSON, pipAddress, method, methodArgs, r, blockNumber)
 	result := newResult(*ret0, *ret1)
 	return result, err
 }
@@ -99,11 +99,11 @@ func (per Per) Ray() string {
 	return utils.Convert("ray", per.Value.String(), 17)
 }
 
-func (gethCupDataFetcher *Fetcher) FetchPerData(methodArg interface{}, blockNumber int64) (*Per, error) {
+func (gethCupDataFetcher *Fetcher) FetchPerData(methodArgs []interface{}, blockNumber int64) (*Per, error) {
 	abiJSON := tub.TubContractABI
 	perAddress := PerAddress
 	method := "per"
 	var result = new(big.Int)
-	err := gethCupDataFetcher.blockchain.FetchContractData(abiJSON, perAddress, method, methodArg, &result, blockNumber)
+	err := gethCupDataFetcher.blockchain.FetchContractData(abiJSON, perAddress, method, methodArgs, &result, blockNumber)
 	return &Per{Value: result}, err
 }

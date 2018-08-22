@@ -47,7 +47,7 @@ func (fakePepFetcher FakeBlockchain) Node() core.Node {
 	panic("implement me")
 }
 
-func (fakePepFetcher FakeBlockchain) FetchContractData(abiJSON string, address string, method string, methodArg interface{}, result interface{}, blockNumber int64) error {
+func (fakePepFetcher FakeBlockchain) FetchContractData(abiJSON string, address string, method string, methodArgs []interface{}, result interface{}, blockNumber int64) error {
 	return nil
 }
 

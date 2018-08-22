@@ -29,11 +29,11 @@ type MockBlockchain struct {
 	BlockNumbers []int64
 }
 
-func (mb *MockBlockchain) FetchContractData(abiJSON string, address string, method string, methodArg interface{}, result interface{}, blockNumber int64) error {
+func (mb *MockBlockchain) FetchContractData(abiJSON string, address string, method string, methodArgs []interface{}, result interface{}, blockNumber int64) error {
 	mb.AbiJSONs = append(mb.AbiJSONs, abiJSON)
 	mb.Addresses = append(mb.Addresses, address)
 	mb.Methods = append(mb.Methods, method)
-	mb.MethodArgs = append(mb.MethodArgs, methodArg)
+	mb.MethodArgs = append(mb.MethodArgs, methodArgs...)
 	mb.Results = append(mb.Results, result)
 	mb.BlockNumbers = append(mb.BlockNumbers, blockNumber)
 	return nil

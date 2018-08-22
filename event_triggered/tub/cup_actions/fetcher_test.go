@@ -34,10 +34,15 @@ var _ = Describe("Fetcher", func() {
 	It("fetches contract data", func() {
 		mockBlockchain := test_helpers.MockBlockchain{}
 		fetcher := cup_actions.CupFetcher{BlockChain: &mockBlockchain}
-		methodArg := "methodArg"
+		methodArg := common.HexToHash("0xmethodArg")
+		hashArgs := []common.Hash{methodArg}
+		interfaceArgs := make([]interface{}, len(hashArgs))
+		for i, s := range hashArgs {
+			interfaceArgs[i] = s
+		}
 		blockNumber := int64(12345)
 
-		cup, err := fetcher.FetchCupData(methodArg, blockNumber)
+		cup, err := fetcher.FetchCupData(interfaceArgs, blockNumber)
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(len(mockBlockchain.AbiJSONs)).To(Equal(1))
@@ -66,10 +71,15 @@ var _ = Describe("Fetcher", func() {
 		transactionConverter := rpc2.NewRpcTransactionConverter(ethClient)
 		blockChain := geth.NewBlockChain(blockChainClient, node, transactionConverter)
 		realFetcher := cup_actions.NewCupFetcher(blockChain)
-		cupID := "0x00000000000000000000000000000000000000000000000000000000000002c6"
-		args := common.HexToHash(cupID)
+		cupID := common.HexToHash("0x00000000000000000000000000000000000000000000000000000000000002c6")
+		hashArgs := []common.Hash{cupID}
+		interfaceArgs := make([]interface{}, len(hashArgs))
+		for i, s := range hashArgs {
+			interfaceArgs[i] = s
+		}
+
 		blockNumber := int64(5257349)
-		result, err := realFetcher.FetchCupData(args, blockNumber)
+		result, err := realFetcher.FetchCupData(interfaceArgs, blockNumber)
 
 		Expect(err).NotTo(HaveOccurred())
 		var ink, art, ire big.Int

@@ -60,11 +60,11 @@ func (cdf *fakeContractDataFetcher) LastBlock() *big.Int {
 	return cdf.lastBlock
 }
 
-func (cdf *fakeContractDataFetcher) FetchContractData(abiJSON string, address string, method string, methodArg interface{}, result interface{}, blockNumber int64) error {
+func (cdf *fakeContractDataFetcher) FetchContractData(abiJSON string, address string, method string, methodArgs []interface{}, result interface{}, blockNumber int64) error {
 	cdf.abis = append(cdf.abis, abiJSON)
 	cdf.addresses = append(cdf.addresses, address)
 	cdf.methods = append(cdf.methods, method)
-	cdf.methodArgs = append(cdf.methodArgs, methodArg)
+	cdf.methodArgs = append(cdf.methodArgs, methodArgs...)
 	cdf.results = append(cdf.results, result)
 	cdf.blocknumbers = append(cdf.blocknumbers, blockNumber)
 	return nil
